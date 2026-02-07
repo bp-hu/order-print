@@ -1,0 +1,17 @@
+{
+  "extends": "@edenx/tsconfig/base",
+  "compilerOptions": {
+    "declaration": false,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"]
+    },
+    "types": ["react", "react-dom"]
+  },
+  "include": ["src", "shared", "config", "edenx.config.ts"],
+  "exclude": ["**/node_modules"]
+}

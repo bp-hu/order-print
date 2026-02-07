@@ -1,0 +1,50 @@
+{
+  "name": "myapp",
+  "version": "1.0.0",
+  "scripts": {
+    "reset": "npx rimraf ./**/node_modules",
+    "setup": "pnpm run reset && pnpm install",
+    "dev": "edenx dev",
+    "build": "edenx build",
+    "start": "edenx start",
+    "serve": "edenx serve",
+    "new": "edenx new",
+    "lint": "biome check",
+    "deploy": "edenx deploy",
+    "deploy:preview": "edenx deploy --preview",
+    "prepare": "simple-git-hooks",
+    "upgrade": "edenx upgrade"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "lint-staged": {
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+      "biome check --files-ignore-unknown=true"
+    ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "dependencies": {
+    "@douyinfe/semi-icons": "^2.91.0",
+    "@douyinfe/semi-illustrations": "^2.91.0",
+    "@douyinfe/semi-ui": "^2.91.0",
+    "@edenx/runtime": "3.0.1",
+    "react": "~19.2.1",
+    "react-dom": "~19.2.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@edenx/app-tools": "3.0.1",
+    "@edenx/tsconfig": "3.0.1",
+    "@types/node": "^20",
+    "@types/react": "~19.2.7",
+    "@types/react-dom": "~19.2.3",
+    "lint-staged": "~13.1.0",
+    "prettier": "^3.4.2",
+    "rimraf": "~3.0.2",
+    "simple-git-hooks": "^2.11.1",
+    "typescript": "~5.7.3"
+  }
+}
