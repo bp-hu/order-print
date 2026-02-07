@@ -1,79 +1,59 @@
-import { Helmet } from '@edenx/runtime/head';
-import type { JSX } from 'react';
-import './index.css';
+import { orderIdAtom } from "@/stores";
+import { IconIdentity } from "@douyinfe/semi-icons";
+import { Button, Input } from "@douyinfe/semi-ui";
+import { useNavigate } from "@edenx/runtime/router";
+import { useAtom } from "jotai";
+import { useState } from "react";
 
-const Index = (): JSX.Element => (
-  <div className="container-box">
-    <Helmet>
-      <link
-        rel="icon"
-        type="image/x-icon"
-        href="https://lf3-static.bytednsdoc.com/obj/eden-cn/upspbovhj/edenx-ico.ico"
+export default () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [orderId, setOrderId] = useAtom(orderIdAtom);
+
+  return (
+    <div className="flex flex-col gap-xl">
+      <h5 className="font-semibold flex items-center gap-3xs text-primary">
+        <IconIdentity />
+        验证订单信息
+      </h5>
+      <Input
+        size="large"
+        placeholder="请输入订单编号"
+        value={orderId}
+        onChange={setOrderId}
       />
-    </Helmet>
-    <main>
-      <div className="title">
-        Welcome to
-        <img
-          className="logo"
-          src="https://lf3-static.bytednsdoc.com/obj/eden-cn/nuvshpqnulg/eden-x-logo.png"
-          alt="EdenX Logo"
-        />
-        <p className="name">EdenX</p>
+      <Button
+        className="w-full"
+        theme="solid"
+        size="large"
+        disabled={!orderId}
+        loading={loading}
+        onClick={() => {
+          setLoading(true);
+          setTimeout(() => {
+            setLoading(false);
+            navigate("/order-detail");
+          }, 300);
+        }}
+      >
+        验证
+      </Button>
+      <div>
+        <h5 className="text-danger font-semibold">温馨提示</h5>
+        <ol>
+          <li>
+            1. 订单内所有产品必须全部设计完成，并点击提交按钮，方能进行生产；
+          </li>
+          <li>
+            2.
+            建议距离第一次编辑30天内提交设计，不然文件到期后，需全部重新编辑；
+          </li>
+          <li>3. 订单支付后，需在3个月内来验证设计，超时不可进入设计；</li>
+          <li>
+            4. 编辑内所见即所得，所有照片请仔细确认效果，一旦提交不可再次修改；
+          </li>
+        </ol>
       </div>
-      <p className="description">
-        Get started by editing <code className="code">src/routes/page.tsx</code>
-      </p>
-      <div className="grid">
-        <div className="card">
-          <div className="card-icon">
-            <div className="card-icon-text">🚀</div>
-          </div>
-          <h2>Rust Bundler</h2>
-          <p>Easily switch to Rspack bundler with faster build speed.</p>
-        </div>
-        <div className="card">
-          <div className="card-icon">
-            <div className="card-icon-text">✨</div>
-          </div>
-          <h2>Integrated BFF</h2>
-          <p>
-            Develop BFF code in the same project, enjoy simple function calls.
-          </p>
-        </div>
-        <div className="card">
-          <div className="card-icon">
-            <div className="card-icon-text">🍭</div>
-          </div>
-          <h2>Nested Routes</h2>
-          <p>File-as-route, comes with lots performance optimizations.</p>
-        </div>
-        <div className="card">
-          <div className="card-icon">
-            <div className="card-icon-text">📦</div>
-          </div>
-          <h2>Multi-Rendering Mode</h2>
-          <p>SSR, SSG, SPR, all out of the box for you.</p>
-        </div>
-        <div className="card">
-          <div className="card-icon">
-            <div className="card-icon-text">🎨</div>
-          </div>
-          <h2>CSS Solutions</h2>
-          <p>CSS Modules, CSS-in-JS, TailwindCSS, take your pick.</p>
-        </div>
-        <div className="card">
-          <div className="card-icon">
-            <div className="card-icon-text">📖</div>
-          </div>
-          <h2>Easy to Configure</h2>
-          <p>
-            Launch with zero configuration, then everything is configurable.
-          </p>
-        </div>
-      </div>
-    </main>
-  </div>
-);
-
-export default Index;
+    </div>
+  );
+};

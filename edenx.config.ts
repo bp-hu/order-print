@@ -1,4 +1,5 @@
-import { appTools, defineConfig } from '@edenx/app-tools';
+import { SemiRspackPlugin } from "@douyinfe/semi-rspack-plugin";
+import { appTools, defineConfig } from "@edenx/app-tools";
 
 // https://edenx.bytedance.net/configure/app/usage
 export default defineConfig({
@@ -7,5 +8,22 @@ export default defineConfig({
     handleDependencies: true,
   },
   devtools: false,
-  plugins: [appTools()],
+  plugins: [
+    appTools({
+      bundler: "rspack",
+    }),
+  ],
+  tools: {
+    rspack(config) {
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new SemiRspackPlugin({
+          cssLayer: true,
+        }) as any,
+      );
+    },
+  },
+  server: {
+    baseUrl: "/html/main",
+  },
 });

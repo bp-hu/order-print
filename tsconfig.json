@@ -10,7 +10,8 @@
       "@/*": ["./src/*"],
       "@shared/*": ["./shared/*"]
     },
-    "types": ["react", "react-dom"]
+    "types": ["react", "react-dom"],
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src", "shared", "config", "edenx.config.ts"],
   "exclude": ["**/node_modules"]
