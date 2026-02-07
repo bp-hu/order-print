@@ -18,7 +18,7 @@ const Layout = (): JSX.Element => {
 
   return (
     <div className="flex items-center justify-center p-lg">
-      <div className="relative min-w-[600px] max-w-[800px]">
+      <div className="relative min-w-[360px] max-w-[800px]">
         <Outlet />
       </div>
     </div>

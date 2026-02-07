@@ -12,6 +12,7 @@ export default () => {
   return (
     <>
       <Button
+        size="small"
         icon={<IconHistory />}
         theme="borderless"
         onClick={() => setVisible(true)}

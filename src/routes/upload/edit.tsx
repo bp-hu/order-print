@@ -28,15 +28,15 @@ function Editor({
       selection.$change(
         0,
         0,
-        400,
-        width > height ? (400 * height) / width : 200,
+        360,
+        width > height ? (360 * height) / width : 180,
       );
     } else if (selection && layout === "vertical") {
       selection.$change(
-        100,
+        90,
         0,
-        width > height ? 200 : (400 * width) / height,
-        400,
+        width > height ? 180 : (360 * width) / height,
+        360,
       );
     }
   }
@@ -79,10 +79,12 @@ function Editor({
       title="编辑图片"
       visible={visible}
       onCancel={() => setVisible(false)}
+      width={400}
     >
       <div className="flex flex-col gap-md">
-        <div className="flex gap-md">
+        <div className="flex flex-wrap gap-md">
           <RadioGroup
+            buttonSize="small"
             type="button"
             value={clipType}
             onChange={(e) => setClipType(e.target.value)}
@@ -92,6 +94,7 @@ function Editor({
             <Radio value="single">单边留白</Radio>
           </RadioGroup>
           <RadioGroup
+            buttonSize="small"
             type="button"
             value={layout}
             onChange={(e) => setLayout(e.target.value)}
@@ -102,10 +105,10 @@ function Editor({
         </div>
         <div
           className={cn(
-            "bg-white flex border border-border-1 w-[402px] h-[402px] [&_cropper-canvas]:h-[400px]",
+            "bg-white flex border border-border-1 w-[362px] h-[362px] [&_cropper-canvas]:h-[360px]",
             {
-              "[&_cropper-canvas]:w-[400px]": clipType === "auto",
-              "[&_cropper-canvas]:w-[380px]": clipType !== "auto",
+              "[&_cropper-canvas]:w-[360px]": clipType === "auto",
+              "[&_cropper-canvas]:w-[340px]": clipType !== "auto",
               "items-center justify-center": clipType === "margin",
             },
           )}

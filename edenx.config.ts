@@ -23,7 +23,4 @@ export default defineConfig({
       );
     },
   },
-  server: {
-    baseUrl: "/html/main",
-  },
 });

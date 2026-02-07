@@ -28,7 +28,7 @@ export default () => {
   return (
     <>
       <div className="flex flex-col h-[calc(100vh-36px)]">
-        <div className="flex gap-3xs">
+        <div className="flex flex-wrap gap-3xs">
           <Upload
             action="https://api.semi.design/upload"
             showUploadList={false}
@@ -37,15 +37,20 @@ export default () => {
               setImageList([...imageList, imageUrl]);
             }}
           >
-            <Button icon={<IconUpload />} theme="solid">
+            <Button size="small" icon={<IconUpload />} theme="solid">
               上传图片
             </Button>
           </Upload>
           <ImageHistory />
-          <Button className="ml-auto" onClick={() => setPreviewVisible(true)}>
-            预览冲印效果
+          <Button
+            className="ml-auto"
+            size="small"
+            onClick={() => setPreviewVisible(true)}
+          >
+            预览
           </Button>
           <Button
+            size="small"
             theme="borderless"
             className="ml-3xs"
             icon={<IconRedo className="ml-auto text-primary" />}
@@ -93,6 +98,7 @@ export default () => {
           title="请选择裁剪方式"
           footer={null}
           closable={false}
+          width={360}
           bodyStyle={{
             paddingBottom: 24,
           }}
