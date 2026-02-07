@@ -10,7 +10,8 @@
       "@/*": ["./src/*"],
       "@shared/*": ["./shared/*"]
     },
-    "types": ["react", "react-dom"]
+    "types": ["react", "react-dom"],
+    "outDir": "docs"
   },
   "include": ["src", "shared", "config", "edenx.config.ts"],
   "exclude": ["**/node_modules"]
