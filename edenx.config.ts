@@ -8,9 +8,4 @@ export default defineConfig({
   },
   devtools: false,
   plugins: [appTools()],
-  output: {
-    distPath: {
-      root: 'docs'
-    }
-  }
 });
