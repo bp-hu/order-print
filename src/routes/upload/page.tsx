@@ -1,12 +1,15 @@
-import { imageListAtom } from "@/stores";
-import { IconRedo, IconSave, IconUpload } from "@douyinfe/semi-icons";
+import { countAtom, imageListAtom, totalAtom } from "@/stores";
+import { single } from "@/utils";
+import { IconSave, IconUpload } from "@douyinfe/semi-icons";
 import { IllustrationNoContent } from "@douyinfe/semi-illustrations";
-import { Button, Empty, Modal, Toast, Upload } from "@douyinfe/semi-ui";
+import { Badge, Button, Empty, Modal, Toast, Upload } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
-import { useAtom } from "jotai";
-import { useState } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { useRef, useState } from "react";
+import { Batch } from "./batch";
 import ImageHistory from "./image-history";
 import ImageList from "./image-list";
+import { PreviewPrint } from "./preview-print";
 
 function fileToDataURL(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -20,63 +23,108 @@ function fileToDataURL(file: File) {
 }
 
 export default () => {
-  const [type, setType] = useState<"custom" | "host" | undefined>(undefined);
+  // const [type, setType] = useState<"custom" | "host" | undefined>(undefined);
   const [imageList, setImageList] = useAtom(imageListAtom);
   const [previewVisible, setPreviewVisible] = useState<boolean>(false);
   const navigate = useNavigate();
+  const total = useAtomValue(totalAtom);
+  const count = useAtomValue(countAtom);
+  const uploadRef = useRef<Upload>(null);
 
   return (
     <>
       <div className="flex flex-col h-[calc(100vh-36px)]">
-        <div className="flex flex-wrap gap-3xs">
-          <Upload
-            action="https://api.semi.design/upload"
-            showUploadList={false}
-            customRequest={async (file) => {
-              const imageUrl = await fileToDataURL(file.fileInstance);
-              setImageList([...imageList, imageUrl]);
-            }}
-          >
-            <Button size="small" icon={<IconUpload />} theme="solid">
-              上传图片
-            </Button>
-          </Upload>
-          <ImageHistory />
-          <Button
-            className="ml-auto"
-            size="small"
-            onClick={() => setPreviewVisible(true)}
-          >
-            预览
-          </Button>
-          <Button
+        <div className="flex flex-wrap gap-xs">
+          <PreviewPrint />
+          <div className="flex items-center gap-xs ml-auto">
+            <ImageHistory />
+            <Upload
+              ref={uploadRef}
+              action="https://api.semi.design/upload"
+              showUploadList={false}
+              multiple
+              beforeUpload={({ fileList }) => {
+                if (count + fileList.length > total) {
+                  single(
+                    "upload-error",
+                    () =>
+                      new Promise((resolve, reject) => {
+                        Modal.error({
+                          width: "100vw",
+                          content: `照片数量不能超过 ${total} 张`,
+                          onOk: resolve,
+                          onCancel: reject,
+                        });
+                      }),
+                  );
+                  return {
+                    shouldUpload: false,
+                  };
+                }
+
+                return {
+                  shouldUpload: true,
+                };
+              }}
+              customRequest={async (file) => {
+                const imageUrl = await fileToDataURL(file.fileInstance);
+                setImageList((prev: any) => [
+                  ...prev,
+                  {
+                    url: imageUrl,
+                    count: 1,
+                  },
+                ]);
+              }}
+            >
+              <Button size="small" icon={<IconUpload />} theme="solid">
+                上传图片
+              </Button>
+            </Upload>
+            <Badge type="danger" count={total} countClassName="right-[6px]">
+              <Button size="small" theme="borderless">
+                3.5*5寸
+              </Button>
+            </Badge>
+            {/* <Button
             size="small"
             theme="borderless"
             className="ml-3xs"
-            icon={<IconRedo className="ml-auto text-primary" />}
+            type="tertiary"
+            icon={<IconRedo className="ml-auto text-text-2" />}
             onClick={() => navigate("/order-detail")}
           >
             返回
-          </Button>
+          </Button> */}
+          </div>
         </div>
-        <div className="flex-1 py-md">
+        <Batch />
+        <div className="mt-xs text-danger typo-sm">
+          虚线框为照片打印区域，不满意可点击“编辑”调整
+        </div>
+        <div className="flex-1 py-md pb-[72px]">
           {imageList.length === 0 ? (
-            <div className="h-full flex items-center justify-center">
+            <div
+              className="h-full flex items-center justify-center"
+              onClick={() => {
+                uploadRef.current?.openFileDialog();
+              }}
+            >
               <Empty
                 image={<IllustrationNoContent />}
-                description="还未添加任何图片，点击上方按钮添加图片"
+                description="还未添加任何图片，点击添加图片"
               />
             </div>
           ) : null}
           <ImageList
             visible={previewVisible}
             onVisibleChange={setPreviewVisible}
-            editable={type === "custom"}
+            editable
           />
         </div>
-        <div className="absolute bottom-0 left-0 w-full flex items-center shadow-md rounded-full border border-border-0">
+        <div className="fixed bottom-[8px] left-0 w-full bg-white flex items-center shadow-md rounded-full border border-border-0">
           <div className="flex-1 text-danger p-md">
-            总计：{imageList.length}/10
+            总计：{count}/{total}
           </div>
           <Button
             icon={<IconSave />}
@@ -84,15 +132,34 @@ export default () => {
             theme="solid"
             className="h-full flex-1 p-md border-l border-border-0 flex items-center justify-center gap-3xs rounded-full"
             onClick={() => {
-              navigate("/order-detail");
-              Toast.success("保存成功");
+              if (count < total) {
+                Modal.error({
+                  width: "100vw",
+                  closable: false,
+                  content: `照片总数不足 ${total} 张！确认保存吗？`,
+                  onOk: () => {
+                    navigate("/order-detail");
+                    Toast.success("保存成功");
+                  },
+                });
+              } else {
+                Modal.confirm({
+                  width: "100vw",
+                  closable: false,
+                  content: "确认保存设计吗？",
+                  onOk: () => {
+                    navigate("/order-detail");
+                    Toast.success("保存成功");
+                  },
+                });
+              }
             }}
           >
             保存设计
           </Button>
         </div>
       </div>
-      {!type ? (
+      {/* {!type ? (
         <Modal
           visible={true}
           title="请选择裁剪方式"
@@ -126,7 +193,7 @@ export default () => {
             </div>
           </div>
         </Modal>
-      ) : null}
+      ) : null} */}
     </>
   );
 };

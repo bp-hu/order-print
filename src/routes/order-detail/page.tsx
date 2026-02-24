@@ -1,10 +1,5 @@
 import { imageListAtom, orderIdAtom } from "@/stores";
-import {
-  IconFile,
-  IconInfoCircle,
-  IconRedo,
-  IconUpload,
-} from "@douyinfe/semi-icons";
+import { IconUpload } from "@douyinfe/semi-icons";
 import { Button, Divider, Image, Typography } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
 import { useAtomValue } from "jotai";
@@ -24,18 +19,16 @@ export default () => {
 
   return (
     <div className="flex flex-col gap-md">
-      <div className="flex items-center">
-        <h5 className="text-primary font-semibold flex items-center gap-3xs">
-          <IconFile />
-          订单详情
+      <div className="relative flex items-center">
+        <h5 className="text-text-0 text-center font-semibold flex-1">
+          设计列表
         </h5>
         <Button
+          className="absolute right-0"
           theme="borderless"
-          className="ml-auto"
-          icon={<IconRedo className="ml-auto text-primary" />}
           onClick={() => navigate("/")}
         >
-          返回
+          验证其他订单
         </Button>
       </div>
       <Divider layout="horizontal" />
@@ -64,15 +57,32 @@ export default () => {
           <History />
         </div>
       </div>
-      {imageList.length < 10 ? (
+      {/* {imageList.length < 10 ? (
         <div className="typo-sm text-danger flex items-center gap-3xs">
           <IconInfoCircle size="small" />
           照片数不足 10 张
         </div>
-      ) : null}
-      <Button size="large" theme="solid" disabled={imageList.length < 10}>
-        提交印刷
-      </Button>
+      ) : null} */}
+      {/* <Divider layout="horizontal" />
+      <div className="flex flex-col gap-md">
+        <h5 className="w-full text-center text-danger">猜你喜欢</h5>
+        <div className="grid grid-cols-2 gap-md">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex flex-col gap-md items-center justify-center"
+            >
+              <Image
+                width={100}
+                src="https://images.unsplash.com/photo-1549298916-b41d501d3772"
+              />
+              <div className="text-text-1 typo-sm break-all">
+                【大尺寸冲印】 8*10寸 套餐 多件有折扣
+              </div>
+            </div>
+          ))}
+        </div>
+      </div> */}
     </div>
   );
 };

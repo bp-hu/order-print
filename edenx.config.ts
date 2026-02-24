@@ -8,6 +8,9 @@ export default defineConfig({
     handleDependencies: true,
   },
   devtools: false,
+  dev: {
+    hmr: process.env.NODE_ENV !== "production",
+  },
   plugins: [
     appTools({
       bundler: "rspack",

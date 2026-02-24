@@ -1,3 +1,19 @@
 @layer theme, base, semi, utilities;
 @import 'tailwindcss';
 @import '@auix/theme';
+
+body {
+    --semi-color-primary: rgba(var(--semi-green-5), 1);
+    --semi-color-primary-hover: rgba(var(--semi-green-6), 1);
+    --semi-color-primary-active: rgba(var(--semi-green-7), 1);
+    --semi-color-primary-disabled: rgba(var(--semi-green-2), 1);
+
+    --color-primary: rgba(var(--semi-green-5), 1);
+    --color-primary-hover: rgba(var(--semi-green-6), 1);
+    --color-primary-active: rgba(var(--semi-green-7), 1);
+    --color-primary-disabled: rgba(var(--semi-green-2), 1);
+}
+
+.semi-image-preview-footer-wrapper {
+    width: 360px;
+}

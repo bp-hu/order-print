@@ -1,8 +1,10 @@
 import { imageListAtom } from "@/stores";
 import { IconCheckCircleStroked, IconHistory } from "@douyinfe/semi-icons";
-import { Button, Image, SideSheet, Tag } from "@douyinfe/semi-ui";
+import { Button, Image, SideSheet, Tag, Typography } from "@douyinfe/semi-ui";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+
+const { Text } = Typography;
 
 export default () => {
   const [visible, setVisible] = useState(false);
@@ -11,17 +13,17 @@ export default () => {
 
   return (
     <>
-      <Button
+      <Text
         size="small"
         icon={<IconHistory />}
-        theme="borderless"
         onClick={() => setVisible(true)}
       >
         历史图片
-      </Button>
+      </Text>
       <SideSheet
         title="历史图片"
-        width={500}
+        width="100vw"
+        placement="bottom"
         visible={visible}
         onCancel={() => setVisible(false)}
         footer={
@@ -43,22 +45,22 @@ export default () => {
         <div className="flex flex-col gap-md">
           <Tag size="large">2026-02-07</Tag>
           <div className="flex flex-wrap gap-md">
-            {imageList.map((src, index) => {
-              const isSelected = selectedKeys.includes(src);
+            {imageList.map(({ url }, index) => {
+              const isSelected = selectedKeys.includes(url);
               return (
                 <div
                   key={index}
                   className="relative rounded-md cursor-pointer hover:[&_[data-slot=check]]:visible"
                   onClick={() =>
                     setSelectedKeys(
-                      selectedKeys.includes(src)
-                        ? selectedKeys.filter((item) => item !== src)
-                        : [...selectedKeys, src],
+                      isSelected
+                        ? selectedKeys.filter((item) => item !== url)
+                        : [...selectedKeys, url],
                     )
                   }
                 >
                   <Image
-                    src={src}
+                    src={url}
                     width={200}
                     alt={`lamp${index + 1}`}
                     style={{ marginRight: 5 }}

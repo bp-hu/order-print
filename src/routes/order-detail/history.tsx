@@ -17,6 +17,8 @@ export default () => {
       <SideSheet
         title="查询历史设计"
         visible={visible}
+        width="100vw"
+        placement="bottom"
         onCancel={() => setVisible(false)}
       >
         <Input placeholder="请输入订单号" />
