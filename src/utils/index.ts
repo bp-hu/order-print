@@ -4,14 +4,14 @@ interface ClipProps {
   layout: "horizontal" | "vertical";
   containerSize: [number, number];
   imageSize: [number, number];
-  frameRatio: number;
+  paperRatio: number;
   isAuto?: boolean;
 }
 
 export function getClipSize({
   layout,
   containerSize,
-  frameRatio,
+  paperRatio,
   isAuto = false,
   imageSize,
 }: ClipProps): {
@@ -22,6 +22,7 @@ export function getClipSize({
 } {
   const [containerWidth, containerHeight] = containerSize;
   const [width, height] = imageSize;
+  const imageRatio = width / height;
 
   if (isAuto) {
     const frameWidth =
@@ -43,27 +44,31 @@ export function getClipSize({
 
   if (layout === "horizontal") {
     const frameHeight =
-      frameRatio < 1
-        ? containerWidth * frameRatio
-        : containerHeight / frameRatio;
+      paperRatio < 1
+        ? containerWidth * paperRatio
+        : containerHeight / paperRatio;
     const frameWidth = containerWidth;
 
     return {
       frameWidth,
       frameHeight,
-      imageWidth: (frameHeight / height) * width,
-      imageHeight: frameHeight,
+      imageWidth:
+        imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width,
+      imageHeight:
+        imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight,
     };
   } else {
     const frameHeight = containerHeight;
     const frameWidth =
-      frameRatio < 1 ? frameHeight * frameRatio : frameHeight / frameRatio;
+      paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
 
     return {
       frameWidth,
       frameHeight,
-      imageWidth: (frameHeight / height) * width,
-      imageHeight: frameHeight,
+      imageWidth:
+        imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width,
+      imageHeight:
+        imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight,
     };
   }
 }
@@ -73,81 +78,133 @@ export function getPrintParams({
   clipType,
   clipPosPercent,
   clipSizePercent,
+  imageSize,
   ...props
-}: Omit<ClipProps, "frameRatio" | "isAuto" | "containerSize"> & {
+}: Omit<ClipProps, "paperRatio" | "isAuto" | "containerSize"> & {
   pageSize: [number, number];
   clipType: ClipType;
   clipPosPercent: [number, number];
   clipSizePercent: [number, number];
 }) {
   const [pageWidth, pageHeight] = pageSize;
-  const frameRatio = pageSize[0] / pageSize[1];
+  const paperRatio = pageSize[0] / pageSize[1];
+  const imageRatio = imageSize[0] / imageSize[1];
   const isAuto = clipType === "auto";
-  const {
-    imageWidth: _imageWidth,
-    imageHeight: _imageHeight,
-    frameHeight,
-    frameWidth,
-  } = getClipSize({
+  const { frameHeight, frameWidth } = getClipSize({
     ...props,
-    frameRatio,
+    paperRatio,
     isAuto,
     containerSize: [400, 400],
+    imageSize,
   });
 
-  const imageWidth = (pageWidth / frameWidth) * _imageWidth;
-  const imageHeight = (pageHeight / frameHeight) * _imageHeight;
+  const imageWidth = (pageWidth / frameWidth) * imageSize[0];
+  const imageHeight = (pageHeight / frameHeight) * imageSize[1];
   const blankWidth = pageWidth - imageWidth;
   const blankHeight = pageHeight - imageHeight;
 
   // 单边留白
   if (clipType === "single") {
-    return {
-      start_x: 0,
-      start_y: 0,
-      end_x: imageWidth,
-      end_y: imageHeight,
-      blank_top: 0,
-      blank_bottom: 0,
-      blank_left: 0,
-      blank_right: blankWidth,
-      photo_w: imageWidth,
-      photo_h: imageHeight,
-    };
+    // 左右留白
+    if (imageRatio <= paperRatio) {
+      return {
+        start_x: 0,
+        start_y: 0,
+        end_x: imageWidth,
+        end_y: imageHeight,
+        blank_top: 0,
+        blank_bottom: 0,
+        blank_left: 0,
+        blank_right: blankWidth,
+        photo_w: imageWidth,
+        photo_h: imageHeight,
+      };
+    } else {
+      // 上下留白
+      return {
+        start_x: 0,
+        start_y: 0,
+        end_x: imageWidth,
+        end_y: imageHeight,
+        blank_top: 0,
+        blank_bottom: blankHeight,
+        blank_left: 0,
+        blank_right: 0,
+        photo_w: imageWidth,
+        photo_h: imageHeight,
+      };
+    }
   }
 
   // 双边留白
   if (clipType === "margin") {
+    // 左右留白
+    if (imageRatio <= paperRatio) {
+      return {
+        start_x: 0,
+        start_y: 0,
+        end_x: imageWidth,
+        end_y: imageHeight,
+        blank_top: 0,
+        blank_bottom: 0,
+        blank_left: blankWidth / 2,
+        blank_right: blankWidth / 2,
+        photo_w: imageWidth,
+        photo_h: imageHeight,
+      };
+    } else {
+      // 上下留白
+      return {
+        start_x: 0,
+        start_y: 0,
+        end_x: imageWidth,
+        end_y: imageHeight,
+        blank_top: blankHeight / 2,
+        blank_bottom: blankHeight / 2,
+        blank_left: 0,
+        blank_right: 0,
+        photo_w: imageWidth,
+        photo_h: imageHeight,
+      };
+    }
+  }
+
+  /** 智能裁剪 */
+  // 高度裁剪
+  if (imageRatio <= paperRatio) {
+    const clipTop = clipPosPercent[0] * pageHeight;
+    const clipHeight = clipSizePercent[1] * pageHeight;
+
     return {
       start_x: 0,
-      start_y: 0,
+      start_y: clipTop,
       end_x: imageWidth,
+      end_y: clipHeight + clipTop,
+      blank_top: 0,
+      blank_bottom: 0,
+      blank_left: 0,
+      blank_right: 0,
+      photo_w: imageWidth,
+      photo_h: imageHeight,
+    };
+  } else {
+    // 宽度裁剪
+    const clipLeft = clipPosPercent[1] * pageWidth;
+    const clipWidth = clipSizePercent[0] * pageWidth;
+
+    return {
+      start_x: clipLeft,
+      start_y: 0,
+      end_x: clipWidth + clipLeft,
       end_y: imageHeight,
       blank_top: 0,
       blank_bottom: 0,
-      blank_left: blankWidth / 2,
-      blank_right: blankWidth / 2,
+      blank_left: 0,
+      blank_right: 0,
       photo_w: imageWidth,
       photo_h: imageHeight,
     };
   }
-
-  // 智能裁剪
-  const clipTop = clipPosPercent[0] * pageHeight;
-  const clipHeight = clipSizePercent[1] * pageHeight;
-
-  return {
-    start_x: 0,
-    start_y: clipTop,
-    end_x: imageWidth,
-    end_y: clipHeight + clipTop,
-    blank_top: 0,
-    blank_bottom: 0,
-    blank_left: 0,
-    blank_right: 0,
-    photo_w: imageWidth,
-    photo_h: imageHeight,
-  };
 }
 
 /**

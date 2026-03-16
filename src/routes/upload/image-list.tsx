@@ -1,5 +1,5 @@
 import { updateImageParams } from "@/servers";
-import { orderAtom, ratioAtom, totalAtom } from "@/stores";
+import { orderAtom, paperRatioAtom, totalAtom } from "@/stores";
 import { http } from "@/utils/http";
 import { IconDelete, IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
@@ -16,7 +16,7 @@ function ImageContainer({
   setCount: (count: number) => void;
 }) {
   const [order, setOrder] = useAtom(orderAtom);
-  const ratio = useAtomValue(ratioAtom);
+  const paperRatio = useAtomValue(paperRatioAtom);
   const image = order?.images?.[index];
   const url = image?.url || "";
   const {
@@ -27,6 +27,8 @@ function ImageContainer({
     naturalHeight = 0,
     naturalWidth = 0,
     clipTopPercent,
+    clipLeftPercent,
+    clipWidthPercent,
     clipHeightPercent,
   } = image?.edited_params ?? {};
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
@@ -38,11 +40,11 @@ function ImageContainer({
         layout={layout}
         clipType={clipType}
         size={[160, 160]}
-        ratio={ratio}
+        paperRatio={paperRatio}
         rotate={rotate}
         imageSize={[naturalWidth, naturalHeight]}
-        clipTopPercent={clipTopPercent || 0}
-        clipHeightPercent={clipHeightPercent || 0}
+        clipPosPercent={[clipLeftPercent || 0, clipTopPercent || 0]}
+        clipSizePercent={[clipWidthPercent || 0, clipHeightPercent || 0]}
         ready
         frameClassName="border border-border-0 border-dashed"
       />

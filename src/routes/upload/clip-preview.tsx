@@ -6,7 +6,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { ClipOverlay } from "./clip-overlay";
 
 export const ClipPreview = ({
-  ratio,
+  paperRatio,
   clipType,
   layout = "horizontal",
   src,
@@ -17,14 +17,14 @@ export const ClipPreview = ({
   rotate = 0,
   children,
   imageSize,
-  clipTopPercent,
-  clipHeightPercent,
+  clipPosPercent,
+  clipSizePercent,
 }: {
-  ratio: number;
+  paperRatio: number;
   src: string;
   clipType?: ClipType;
-  clipTopPercent?: number;
-  clipHeightPercent?: number;
+  clipPosPercent?: [number, number];
+  clipSizePercent?: [number, number];
   layout?: ClipLayout;
   size?: [number, number];
   imageSize: [number, number];
@@ -39,7 +39,7 @@ export const ClipPreview = ({
         frameHeight: number;
         imageWidth: number;
         imageHeight: number;
-        ratio: number;
+        paperRatio: number;
         layout: ClipLayout;
       }) => ReactNode);
 }) => {
@@ -61,7 +61,7 @@ export const ClipPreview = ({
           layout,
           containerSize: size,
           imageSize,
-          frameRatio: ratio,
+          paperRatio,
           isAuto: clipType === "auto",
         }),
       );
@@ -81,11 +81,13 @@ export const ClipPreview = ({
     );
   }
 
+  const imageRatio = imageSize[0] / imageSize[1];
+
   return (
     <div
       style={
         {
-          "--height": `${ratio * containerHeight}px`,
+          "--height": `${paperRatio * containerHeight}px`,
           "--container-width": `${containerWidth}px`,
           "--container-height": `${containerHeight}px`,
         } as any
@@ -132,14 +134,15 @@ export const ClipPreview = ({
         {(typeof children === "function"
           ? children({
               ...clipSize,
-              ratio,
+              paperRatio,
               layout,
             })
           : children) ??
           (clipType === "auto" ? (
             <ClipOverlay
-              clipTopPercent={clipTopPercent || 0}
-              clipHeightPercent={clipHeightPercent || 0}
+              isVertical={imageRatio <= paperRatio}
+              clipPosPercent={clipPosPercent || [0, 0]}
+              clipSizePercent={clipSizePercent || [0, 0]}
             />
           ) : null)}
       </div>

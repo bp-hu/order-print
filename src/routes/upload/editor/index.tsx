@@ -1,5 +1,5 @@
 import { updateImageParams } from "@/servers";
-import { orderAtom, ratioAtom } from "@/stores";
+import { orderAtom, paperRatioAtom } from "@/stores";
 import { EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
@@ -34,7 +34,7 @@ function Editor({
   index: number;
 }) {
   const [order, setOrder] = useAtom(orderAtom);
-  const ratio = useAtomValue(ratioAtom);
+  const paperRatio = useAtomValue(paperRatioAtom);
   const image = order?.images[index];
   const src = image?.url || "";
   const [editParams, setEditParams] = useState(
@@ -94,32 +94,44 @@ function Editor({
     >
       <div className="flex flex-col items-center gap-md">
         <ClipPreview
-          ratio={ratio}
+          paperRatio={paperRatio}
           clipType={editParams.clipType}
           layout={editParams.layout}
           src={src}
           ready={visible}
           rotate={editParams.rotate}
-          clipTopPercent={editParams.clipTopPercent || 0}
-          clipHeightPercent={editParams.clipHeightPercent || 0}
+          clipPosPercent={[
+            editParams.clipLeftPercent || 0,
+            editParams.clipTopPercent || 0,
+          ]}
+          clipSizePercent={[
+            editParams.clipWidthPercent || 0,
+            editParams.clipHeightPercent || 0,
+          ]}
           imageSize={[
             editParams.naturalWidth || 0,
             editParams.naturalHeight || 0,
           ]}
         >
           {editParams.clipType === "auto"
-            ? ({ frameHeight, frameWidth, ratio, layout }) => (
+            ? ({ frameHeight, frameWidth, paperRatio, layout }) => (
                 <Clip
                   frameHeight={frameHeight}
                   frameWidth={frameWidth}
                   layout={layout}
-                  ratio={ratio}
-                  defaultClipTopPercent={editParams.clipTopPercent || 0}
+                  paperRatio={paperRatio}
+                  defaultClipPosPercent={[
+                    editParams.clipLeftPercent || 0,
+                    editParams.clipTopPercent || 0,
+                  ]}
+                  imageRatio={
+                    (editParams.naturalWidth || 0) /
+                    (editParams.naturalHeight || 0)
+                  }
                   onMove={(pos) =>
                     setEditParams({
                       ...editParams,
-                      clipTopPercent: pos.clipTopPercent,
-                      clipHeightPercent: pos.clipHeightPercent,
+                      ...pos,
                     })
                   }
                 />
@@ -215,14 +227,20 @@ function Editor({
             onClick={() => setPreviewVisible(false)}
           />
           <ClipPreview
-            ratio={ratio}
+            paperRatio={paperRatio}
             clipType={editParams.clipType}
             layout={editParams.layout}
             src={src}
             ready={visible}
             rotate={editParams.rotate}
-            clipTopPercent={editParams.clipTopPercent || 0}
-            clipHeightPercent={editParams.clipHeightPercent || 0}
+            clipPosPercent={[
+              editParams.clipLeftPercent || 0,
+              editParams.clipTopPercent || 0,
+            ]}
+            clipSizePercent={[
+              editParams.clipWidthPercent || 0,
+              editParams.clipHeightPercent || 0,
+            ]}
             imageSize={[
               editParams.naturalWidth || 0,
               editParams.naturalHeight || 0,

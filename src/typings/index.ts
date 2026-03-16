@@ -15,7 +15,9 @@ export type EditParams = {
   paper_h?: number;
   clipType: ClipType;
   clipTopPercent?: number;
+  clipLeftPercent?: number;
   clipHeightPercent?: number;
+  clipWidthPercent?: number;
   layout: ClipLayout;
   autoToning: boolean;
   naturalWidth?: number;

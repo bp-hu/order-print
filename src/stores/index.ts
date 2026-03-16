@@ -85,7 +85,7 @@ export const refreshOrderAtom = atom(null, async (get, set) => {
     set(orderLoadingAtom, false);
   }
 });
-export const ratioAtom = atom<number>((get) => {
+export const paperRatioAtom = atom<number>((get) => {
   const order = get(orderAtom);
   const photoSize = PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
   return photoSize ? photoSize.w / photoSize.h : 0.4;
