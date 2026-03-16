@@ -1,6 +1,6 @@
-import { imageListAtom } from "@/stores";
-import { Outlet } from "@edenx/runtime/router";
-import { useSetAtom } from "jotai";
+import { imageListAtom, orderIdAtom, refreshOrderAtom } from "@/stores";
+import { Outlet, useNavigate } from "@edenx/runtime/router";
+import { useAtom, useSetAtom } from "jotai";
 import localforage from "localforage";
 import { useEffect, type JSX } from "react";
 import CannonBannerSVG from "./canon-banner.svg";
@@ -8,6 +8,9 @@ import "./index.css";
 
 const Layout = (): JSX.Element => {
   const setImageList = useSetAtom(imageListAtom);
+  const [orderId, setOrderId] = useAtom(orderIdAtom);
+  const navigate = useNavigate();
+  const refreshOrder = useSetAtom(refreshOrderAtom);
 
   useEffect(() => {
     localforage.getItem<string[]>("imageList").then((imageList) => {
@@ -24,6 +27,18 @@ const Layout = (): JSX.Element => {
         );
       }
     });
+  }, []);
+
+  useEffect(() => {
+    if (orderId && location.pathname === "/") {
+      refreshOrder()
+        .then(() => {
+          navigate("/order-detail");
+        })
+        .catch(() => {
+          setOrderId("");
+        });
+    }
   }, []);
 
   return (

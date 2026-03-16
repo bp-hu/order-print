@@ -1,21 +1,16 @@
-import { imageListAtom, orderIdAtom } from "@/stores";
+import { orderAtom, orderIdAtom } from "@/stores";
 import { IconUpload } from "@douyinfe/semi-icons";
 import { Button, Divider, Image, Typography } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import History from "./history";
 
 const { Text } = Typography;
 
 export default () => {
   const navigate = useNavigate();
-  const orderId = useAtomValue(orderIdAtom);
-  const imageList = useAtomValue(imageListAtom);
-
-  // if (!orderId) {
-  //   navigate("/");
-  //   return null;
-  // }
+  const order = useAtomValue(orderAtom);
+  const setOrderId = useSetAtom(orderIdAtom);
 
   return (
     <div className="flex flex-col gap-md">
@@ -26,7 +21,11 @@ export default () => {
         <Button
           className="absolute right-0"
           theme="borderless"
-          onClick={() => navigate("/")}
+          onClick={() => {
+            // 验证其他订单时，需要清空当前订单号
+            setOrderId("");
+            navigate("/");
+          }}
         >
           验证其他订单
         </Button>
@@ -39,8 +38,8 @@ export default () => {
             src="https://images.unsplash.com/photo-1549298916-b41d501d3772"
           />
           <div className="ml-auot flex flex-col gap-3xs">
-            <Text type="secondary">订单号：{orderId}</Text>
-            <Text type="secondary">淘宝套餐 乐凯绒面 6寸白边 10</Text>
+            <Text type="secondary">订单号：{order?.order_number}</Text>
+            <Text type="secondary">{order?.order_name}</Text>
           </div>
         </div>
         <div className="ml-auto flex flex-col gap-md">
@@ -49,7 +48,7 @@ export default () => {
             icon={<IconUpload />}
             theme="solid"
             onClick={() => {
-              navigate("/upload");
+              navigate(`/upload?id=${order?.order_number}`);
             }}
           >
             上传图片

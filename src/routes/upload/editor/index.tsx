@@ -1,4 +1,7 @@
-import { imageListAtom } from "@/stores";
+import { updateImageParams } from "@/servers";
+import { orderAtom, ratioAtom } from "@/stores";
+import { EditParams } from "@/typings";
+import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
 import {
   IconClose,
@@ -11,10 +14,9 @@ import {
   Radio,
   RadioGroup,
   SideSheet,
-  Switch,
   Typography,
 } from "@douyinfe/semi-ui";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 import { ClipPreview } from "../clip-preview";
 import { Angle } from "./angle";
@@ -25,30 +27,18 @@ const { Text } = Typography;
 function Editor({
   visible,
   setVisible,
-  ratio = 0.7,
   index,
 }: {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  ratio?: number;
   index: number;
 }) {
-  const [imageList, setImageList] = useAtom(imageListAtom);
-  const {
-    url: src,
-    clipType: defaultClipType,
-    layout: defaultLayout,
-    autoToning: defaultAutoToning,
-    angle,
-  } = imageList[index];
-  const [clipType, setClipType] = useState<"auto" | "margin" | "single">(
-    () => defaultClipType || "auto",
-  );
-  const [layout, setLayout] = useState<"horizontal" | "vertical">(
-    () => defaultLayout || "horizontal",
-  );
-  const [autoToning, setAutoToning] = useState<boolean>(
-    () => defaultAutoToning || false,
+  const [order, setOrder] = useAtom(orderAtom);
+  const ratio = useAtomValue(ratioAtom);
+  const image = order?.images[index];
+  const src = image?.url || "";
+  const [editParams, setEditParams] = useState(
+    () => image?.edited_params || ({} as EditParams),
   );
   const [previewVisible, setPreviewVisible] = useState(false);
 
@@ -57,20 +47,41 @@ function Editor({
       title={null}
       closable={false}
       visible={visible}
-      onCancel={() => {
+      onCancel={async () => {
         setVisible(false);
-        setImageList(
-          imageList.map((v, i) =>
-            i === index
-              ? {
-                  ...v,
-                  clipType,
-                  layout,
-                  autoToning,
-                }
-              : v,
-          ),
-        );
+        const orderId = order?.order_number;
+        if (orderId && image) {
+          const nextEditParams = {
+            ...editParams,
+            ...getPrintParams({
+              pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
+              layout: editParams.layout,
+              clipType: editParams.clipType,
+              imageSize: [
+                editParams.naturalWidth || 0,
+                editParams.naturalHeight || 0,
+              ],
+              clipPosPercent: [editParams.clipTopPercent || 0, 0],
+              clipSizePercent: [0, editParams.clipHeightPercent || 0],
+            }),
+          };
+          await updateImageParams({
+            orderId,
+            imageId: image.id,
+            params: nextEditParams,
+          });
+          setOrder({
+            ...order,
+            images: order.images.map((item) =>
+              item.id === image.id
+                ? {
+                    ...item,
+                    edited_params: nextEditParams,
+                  }
+                : item,
+            ),
+          });
+        }
       }}
       headerStyle={{
         display: "none",
@@ -81,38 +92,62 @@ function Editor({
       placement="bottom"
       height="80%"
     >
-      <div className="flex flex-col gap-md">
+      <div className="flex flex-col items-center gap-md">
         <ClipPreview
           ratio={ratio}
-          clipType={clipType}
-          layout={layout}
+          clipType={editParams.clipType}
+          layout={editParams.layout}
           src={src}
           ready={visible}
-          angle={angle}
+          rotate={editParams.rotate}
+          clipTopPercent={editParams.clipTopPercent || 0}
+          clipHeightPercent={editParams.clipHeightPercent || 0}
+          imageSize={[
+            editParams.naturalWidth || 0,
+            editParams.naturalHeight || 0,
+          ]}
         >
-          {clipType === "auto"
-            ? ({ frameHeight, frameWidth, imageRef, ratio }) => (
+          {editParams.clipType === "auto"
+            ? ({ frameHeight, frameWidth, ratio, layout }) => (
                 <Clip
                   frameHeight={frameHeight}
                   frameWidth={frameWidth}
-                  imageRef={imageRef}
-                  ratio={ratio}
                   layout={layout}
+                  ratio={ratio}
+                  defaultClipTopPercent={editParams.clipTopPercent || 0}
+                  onMove={(pos) =>
+                    setEditParams({
+                      ...editParams,
+                      clipTopPercent: pos.clipTopPercent,
+                      clipHeightPercent: pos.clipHeightPercent,
+                    })
+                  }
                 />
               )
             : null}
         </ClipPreview>
         <div className="flex flex-col gap-md">
           <div className="grid grid-cols-3">
-            <div className="flex items-center gap-xs">
+            {/* <div className="flex items-center gap-xs">
               自动调色
-              <Switch checked={autoToning} onChange={setAutoToning} />
-            </div>
+              <Switch
+                checked={editParams.autoToning}
+                onChange={(v) => {
+                  setEditParams({
+                    ...editParams,
+                    autoToning: v,
+                  });
+                }}
+              />
+            </div> */}
             <RadioGroup
               type="button"
-              value={layout}
+              value={editParams.layout}
               onChange={(e) => {
-                setLayout(e.target.value);
+                setEditParams({
+                  ...editParams,
+                  layout: e.target.value,
+                });
               }}
             >
               <Radio value="horizontal">横版</Radio>
@@ -126,26 +161,35 @@ function Editor({
               预览
             </Button>
           </div>
-          <Angle index={index} />
+          <Angle
+            angle={editParams.rotate}
+            setAngle={
+              (rotate) => {}
+              //setEditParams({ ...editParams, rotate })
+            }
+          />
           <div className="flex">
             {[
               {
                 icon: <IconColorPalette />,
                 label: "智能裁剪",
-                active: clipType === "auto",
-                onClick: () => setClipType("auto"),
+                active: editParams.clipType === "auto",
+                onClick: () =>
+                  setEditParams({ ...editParams, clipType: "auto" }),
               },
               {
                 icon: <IconImage />,
                 label: "两边留白",
-                active: clipType === "margin",
-                onClick: () => setClipType("margin"),
+                active: editParams.clipType === "margin",
+                onClick: () =>
+                  setEditParams({ ...editParams, clipType: "margin" }),
               },
               {
                 icon: <IconImage />,
                 label: "单边留白",
-                active: clipType === "single",
-                onClick: () => setClipType("single"),
+                active: editParams.clipType === "single",
+                onClick: () =>
+                  setEditParams({ ...editParams, clipType: "single" }),
               },
             ].map((v) => (
               <div
@@ -172,11 +216,17 @@ function Editor({
           />
           <ClipPreview
             ratio={ratio}
-            clipType={clipType}
-            layout={layout}
+            clipType={editParams.clipType}
+            layout={editParams.layout}
             src={src}
             ready={visible}
-            angle={angle}
+            rotate={editParams.rotate}
+            clipTopPercent={editParams.clipTopPercent || 0}
+            clipHeightPercent={editParams.clipHeightPercent || 0}
+            imageSize={[
+              editParams.naturalWidth || 0,
+              editParams.naturalHeight || 0,
+            ]}
           />
         </div>
       ) : null}

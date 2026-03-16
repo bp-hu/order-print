@@ -1,4 +1,6 @@
-import { imageListAtom } from "@/stores";
+import { deleteImageList, updateImageListParams } from "@/servers";
+import { orderAtom } from "@/stores";
+import { EditParams } from "@/typings";
 import { cn } from "@auix/utils";
 import {
   IconAlertTriangle,
@@ -7,7 +9,7 @@ import {
   IconEdit,
   IconImage,
 } from "@douyinfe/semi-icons";
-import { Button, Modal, SideSheet, Switch } from "@douyinfe/semi-ui";
+import { Button, Modal, SideSheet, Switch, Toast } from "@douyinfe/semi-ui";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { CountEditor } from "./count-editor";
@@ -15,7 +17,8 @@ import { CountEditor } from "./count-editor";
 export function Batch() {
   const [visible, setVisible] = useState(false);
   const [countVisible, setCountVisible] = useState(false);
-  const [imageList, setImageList] = useAtom(imageListAtom);
+  const [order, setOrder] = useAtom(orderAtom);
+  const imageIds = (order?.images || [])?.map((v) => v.id || "");
 
   return (
     <>
@@ -104,8 +107,18 @@ export function Batch() {
                 ),
                 title: "重要提示",
                 content: "删除操作无法撤销，确认删除？",
-                onOk() {
-                  setImageList([]);
+                async onOk() {
+                  const orderId = order?.order_number;
+
+                  if (orderId && imageIds.length) {
+                    await deleteImageList(orderId, imageIds);
+                    setOrder({
+                      ...order,
+                      images: [],
+                    });
+                    Toast.success("删除成功");
+                  }
+
                   setVisible(false);
                 },
               });
@@ -118,8 +131,31 @@ export function Batch() {
       <CountEditor
         visible={countVisible}
         setVisible={setCountVisible}
-        onOk={(count) => {
-          setImageList(imageList.map((v) => ({ ...v, count })));
+        onOk={async (count) => {
+          if (order) {
+            await updateImageListParams(
+              order.order_number || "",
+              order.images.reduce(
+                (acc, item) => {
+                  acc[item.id || ""] = {
+                    ...item.edited_params,
+                    count,
+                  };
+                  return acc;
+                },
+                {} as Record<string, EditParams>,
+              ),
+            );
+
+            setOrder({
+              ...order,
+              images:
+                order.images.map((item) => ({
+                  ...item,
+                  edited_params: { ...item.edited_params, count },
+                })) || [],
+            });
+          }
         }}
       />
     </>

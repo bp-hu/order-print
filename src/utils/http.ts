@@ -1,4 +1,3 @@
-import { Toast } from "@douyinfe/semi-ui";
 import { createHttp as createBaseHttp } from "@safe-fe/utils";
 import { stringify } from "qs";
 
@@ -22,10 +21,10 @@ export function createHttp(baseURL = "", mapRes = (v: any) => v) {
       }
 
       if (!disableErrorHandle) {
-        Toast.error(msg);
+        import("@douyinfe/semi-ui").then(({ Toast }) => Toast.error(msg));
       }
     },
   });
 }
 
-export const http = createHttp("/api", (res) => res.data);
+export const http = createHttp("/api/v1", (res) => res.data);

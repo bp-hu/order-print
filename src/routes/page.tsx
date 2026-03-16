@@ -1,20 +1,21 @@
 import { orderIdAtom } from "@/stores";
+import { http } from "@/utils/http";
 import { Button, Input } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
+import { useRequest } from "@safe-fe/hooks";
 import { useAtom } from "jotai";
-import { useState } from "react";
 
 export default () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useAtom(orderIdAtom);
+  const { run: getOrderDetail, loading } = useRequest(() =>
+    http.get(`/orders/${orderId}`).then(() => {
+      navigate(`/order-detail?id=${orderId}`);
+    }),
+  );
 
   function submit() {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      navigate("/order-detail");
-    }, 300);
+    getOrderDetail();
   }
 
   return (

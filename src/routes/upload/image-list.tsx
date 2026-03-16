@@ -1,4 +1,6 @@
-import { imageListAtom, totalAtom } from "@/stores";
+import { updateImageParams } from "@/servers";
+import { orderAtom, ratioAtom, totalAtom } from "@/stores";
+import { http } from "@/utils/http";
 import { IconDelete, IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
 import { useAtom, useAtomValue } from "jotai";
@@ -13,8 +15,20 @@ function ImageContainer({
   index: number;
   setCount: (count: number) => void;
 }) {
-  const [imageList, setImageList] = useAtom(imageListAtom);
-  const { url, count, layout, clipType, angle } = imageList[index];
+  const [order, setOrder] = useAtom(orderAtom);
+  const ratio = useAtomValue(ratioAtom);
+  const image = order?.images?.[index];
+  const url = image?.url || "";
+  const {
+    count = 1,
+    layout,
+    clipType,
+    rotate,
+    naturalHeight = 0,
+    naturalWidth = 0,
+    clipTopPercent,
+    clipHeightPercent,
+  } = image?.edited_params ?? {};
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
 
   return (
@@ -24,7 +38,11 @@ function ImageContainer({
         layout={layout}
         clipType={clipType}
         size={[160, 160]}
-        angle={angle}
+        ratio={ratio}
+        rotate={rotate}
+        imageSize={[naturalWidth, naturalHeight]}
+        clipTopPercent={clipTopPercent || 0}
+        clipHeightPercent={clipHeightPercent || 0}
         ready
         frameClassName="border border-border-0 border-dashed"
       />
@@ -41,10 +59,28 @@ function ImageContainer({
                 onClick={() => {
                   Modal.confirm({
                     title: "确认删除吗？",
-                    content: "删除后将无法恢复",
+                    content: "删除后可以从历史图片中恢复",
                     width: "100vw",
                     onOk: () => {
-                      setImageList(imageList.filter((_, i) => i !== index));
+                      if (!order) {
+                        return;
+                      }
+                      http
+                        .delete(
+                          `/images/${order?.order_number || ""}/${image?.id}`,
+                        )
+                        .then(() => {
+                          setOrder({
+                            ...order,
+                            images: (order.images || []).filter(
+                              (_, i) => i !== index,
+                            ),
+                            history_images: [
+                              ...(order.history_images || []),
+                              image?.id || "",
+                            ],
+                          });
+                        });
                     },
                   });
                 }}
@@ -96,42 +132,44 @@ function ImageContainer({
 export default ({
   visible,
   onVisibleChange,
-  editable,
 }: {
   visible: boolean;
   onVisibleChange: (v: boolean) => void;
-  editable?: boolean;
 }) => {
-  const [imageList, setImageList] = useAtom(imageListAtom);
   const total = useAtomValue(totalAtom);
+  const [order, setOrder] = useAtom(orderAtom);
 
   return (
     <>
       <ImagePreview
-        src={imageList.map((item) => item.url)}
+        src={order?.images.map((item) => item.url)}
         visible={visible}
         onVisibleChange={onVisibleChange}
         disableDownload
       />
       <div className="flex flex-wrap gap-lg">
-        {imageList.map((_, index) => (
+        {order?.images.map((_, index) => (
           <ImageContainer
             key={index}
             index={index}
             setCount={(count) => {
-              const nextImageList = imageList.map((item, i) =>
-                i === index ? { ...item, count } : item,
+              const nextImages = order?.images.map((item, i) =>
+                i === index
+                  ? { ...item, edited_params: { ...item.edited_params, count } }
+                  : item,
               );
-              const nextTotal = nextImageList.reduce(
-                (acc, item) => acc + item.count,
+              const nextTotal = nextImages.reduce(
+                (acc, item) => acc + (item.edited_params?.count || 0),
                 0,
               );
               if (nextTotal <= total) {
-                setImageList(
-                  imageList.map((item, i) =>
-                    i === index ? { ...item, count } : item,
-                  ),
-                );
+                setOrder({ ...order, images: nextImages });
+                const nextImage = nextImages[index];
+                updateImageParams({
+                  orderId: order.order_number,
+                  imageId: nextImage.id,
+                  params: nextImage.edited_params,
+                });
               }
             }}
           />

@@ -1,27 +1,13 @@
-import { imageListAtom } from "@/stores";
 import { IconForward, IconReply } from "@douyinfe/semi-icons";
 import { Button, Input } from "@douyinfe/semi-ui";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useState } from "react";
 
-export function Angle({ index }: { index: number }) {
-  const { angle } = useAtomValue(imageListAtom)[index];
-  const setImageList = useSetAtom(imageListAtom);
-  const [tempAngle, setTempAngle] = useState<number | undefined>(
-    () => angle || 0,
-  );
-
-  const setAngle = (angle: number) => {
-    setTempAngle(angle);
-    setImageList((prev: any) => {
-      prev[index] = {
-        ...prev[index],
-        angle,
-      };
-      return [...prev];
-    });
-  };
-
+export function Angle({
+  angle,
+  setAngle,
+}: {
+  angle: number | undefined;
+  setAngle: (angle: number | undefined) => void;
+}) {
   return (
     <div className="flex items-center justify-center gap-xs">
       角度
@@ -29,19 +15,17 @@ export function Angle({ index }: { index: number }) {
         size="small"
         icon={<IconReply />}
         onClick={() => {
-          const nextAngle = (tempAngle ?? 0) - 1;
-          setTempAngle(nextAngle);
-          setAngle(nextAngle);
+          setAngle((angle ?? 0) - 1);
         }}
       />
       <Input
         className="w-[36px] [&>input]:px-3xs"
-        value={tempAngle}
+        value={angle}
         onChange={(v) => {
-          setTempAngle(v === "" ? undefined : Number(v));
+          setAngle(v === "" ? undefined : Number(v));
         }}
         onBlur={() => {
-          setAngle(tempAngle ?? 0);
+          setAngle(angle ?? 0);
         }}
       />
       °
@@ -49,8 +33,7 @@ export function Angle({ index }: { index: number }) {
         size="small"
         icon={<IconForward />}
         onClick={() => {
-          const nextAngle = (tempAngle ?? 0) + 1;
-          setTempAngle(nextAngle);
+          const nextAngle = (angle ?? 0) + 1;
           setAngle(nextAngle);
         }}
       />

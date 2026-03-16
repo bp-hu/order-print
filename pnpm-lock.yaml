@@ -35,6 +35,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.1.18
         version: 4.2.0
+      dayjs:
+        specifier: ^1.11.19
+        version: 1.11.19
       jotai:
         specifier: ^2.17.1
         version: 2.18.0(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@18.3.28)(react@18.3.1)

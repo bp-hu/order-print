@@ -1,4 +1,4 @@
-import { imageListAtom } from "@/stores";
+import { orderAtom } from "@/stores";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -7,13 +7,13 @@ import {
 import { Button } from "@douyinfe/semi-ui";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
-import { ClipPreview } from "./clip-preview";
 
 export function PreviewPrint() {
-  const imageList = useAtomValue(imageListAtom);
+  const order = useAtomValue(orderAtom);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [previewVisible, setPreviewVisible] = useState<boolean>(false);
-  const currentImage = imageList[currentIndex];
+  const images = order?.images || [];
+  const currentImage = images[currentIndex];
 
   return (
     <>
@@ -31,29 +31,30 @@ export function PreviewPrint() {
             className="absolute top-4 right-4 text-white text-[24px] cursor-pointer"
             onClick={() => setPreviewVisible(false)}
           />
-          <IconChevronLeft
-            className="absolute top-[50%] left-4 text-white text-[24px] cursor-pointer"
-            onClick={() =>
-              setCurrentIndex(
-                (currentIndex - 1 + imageList.length) % imageList.length,
-              )
-            }
-          />
-          <div>
-            <ClipPreview
-              layout={currentImage.layout}
-              clipType={currentImage.clipType}
-              src={currentImage.url}
-              ready
-              size={[300, 300]}
+          {images.length > 1 ? (
+            <IconChevronLeft
+              className="absolute top-[50%] left-4 text-white text-[24px] cursor-pointer"
+              onClick={() =>
+                setCurrentIndex(
+                  (currentIndex - 1 + images.length) % images.length,
+                )
+              }
+            />
+          ) : null}
+          <div className="w-[300px] h-[300px]">
+            <img
+              className="object-contain w-full h-full"
+              src={`${currentImage.url}/edited`}
             />
           </div>
-          <IconChevronRight
-            className="absolute top-[50%] right-4 text-white text-[24px] cursor-pointer"
-            onClick={() =>
-              setCurrentIndex((currentIndex + 1) % imageList.length)
-            }
-          />
+          {images.length > 1 ? (
+            <IconChevronRight
+              className="absolute top-[50%] right-4 text-white text-[24px] cursor-pointer"
+              onClick={() =>
+                setCurrentIndex((currentIndex + 1) % images.length)
+              }
+            />
+          ) : null}
         </div>
       ) : null}
     </>

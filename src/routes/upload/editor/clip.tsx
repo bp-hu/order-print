@@ -1,5 +1,6 @@
-import { cn } from "@auix/utils";
-import { CSSProperties, RefObject, useEffect, useRef, useState } from "react";
+import { ClipLayout } from "@/typings";
+import { cn, useUpdateEffect } from "@auix/utils";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 
 export function Clip({
@@ -7,48 +8,55 @@ export function Clip({
   style,
   frameHeight,
   frameWidth,
-  layout = "horizontal",
-  imageRef,
+  defaultClipTopPercent,
+  onMove,
+  layout,
   ratio,
+  disabled,
 }: {
   className?: string;
   style?: CSSProperties;
   frameHeight: number;
   frameWidth: number;
-  layout?: "horizontal" | "vertical";
-  imageRef: RefObject<HTMLImageElement>;
+  layout: ClipLayout;
   ratio: number;
+  disabled?: boolean;
+  defaultClipTopPercent?: number;
+  onMove?: (props: {
+    clipTopPercent: number;
+    clipHeightPercent: number;
+  }) => void;
 }) {
   const nodeRef = useRef<HTMLDivElement>(null);
-  const [clipSize, setClipSize] = useState({
-    width: 0,
-    height: 0,
-  });
   const [position, setPosition] = useState({
     x: 0,
-    y: 0,
+    y: (defaultClipTopPercent || 0) * frameHeight,
   });
   const { y: clipTop } = position;
+  // const croppingWidth =  frameWidth;
+  const croppingHeight =
+    (layout === "horizontal" && ratio < 1) ||
+    (layout === "vertical" && ratio >= 1)
+      ? frameWidth * ratio
+      : frameWidth / ratio;
 
   useEffect(() => {
-    if (!imageRef.current) {
+    if (!frameHeight) {
       return;
     }
-    const { naturalWidth: width, naturalHeight: height } = imageRef.current;
-    if (layout === "horizontal") {
-      const clipHeight = frameWidth * ratio;
-      setClipSize({
-        width: (clipHeight / height) * width,
-        height: clipHeight,
-      });
-    } else {
-      const clipWidth = frameHeight * ratio;
-      setClipSize({
-        width: clipWidth,
-        height: (clipWidth / width) * height,
-      });
-    }
-  }, [imageRef, layout, frameHeight, frameWidth, ratio]);
+    onMove?.({
+      clipTopPercent: clipTop / frameHeight,
+      clipHeightPercent: croppingHeight / frameHeight,
+    });
+  }, [position, frameHeight]);
+
+  // 切换布局时，重置位置
+  useUpdateEffect(() => {
+    setPosition({
+      x: 0,
+      y: 0,
+    });
+  }, [layout]);
 
   return (
     <div
@@ -67,9 +75,10 @@ export function Clip({
         axis="y"
         nodeRef={nodeRef}
         position={position}
+        disabled={disabled}
         bounds={{
           top: 0,
-          bottom: frameHeight - clipSize.height,
+          bottom: frameHeight - croppingHeight,
         }}
         onDrag={(_, data) => {
           setPosition({
@@ -82,7 +91,7 @@ export function Clip({
           ref={nodeRef}
           style={
             {
-              "--clip-height": `${clipSize.height}px`,
+              "--clip-height": `${croppingHeight}px`,
             } as any
           }
           className="relative w-full h-(--clip-height)"
@@ -112,7 +121,7 @@ export function Clip({
       <div
         style={
           {
-            "--mask-height": `${frameHeight - clipTop - clipSize.height}px`,
+            "--mask-height": `${frameHeight - clipTop - croppingHeight}px`,
           } as any
         }
         className="absolute bottom-0 left-0 w-full h-(--mask-height) bg-[#ffffff80]"
