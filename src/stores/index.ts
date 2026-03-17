@@ -1,10 +1,8 @@
 import { PHOTO_SIZES } from "@/consts";
 import { getImageInfoList } from "@/servers";
-import { ClipLayout, ClipType } from "@/typings";
 import { IOrder } from "@/typings/index";
 import { http } from "@/utils/http";
 import { atom } from "jotai";
-import localforage from "localforage";
 
 export const orderIdAtom = atom(
   localStorage.getItem("orderId") || "",
@@ -15,21 +13,6 @@ export const orderIdAtom = atom(
     } else {
       localStorage.removeItem("orderId");
     }
-  },
-);
-export const imageListAtom = atom(
-  [] as {
-    url: string;
-    count: number;
-    clipType: ClipType;
-    layout: ClipLayout;
-    autoToning: boolean;
-    angle: number;
-  }[],
-  (get, set, v) => {
-    const finalV = typeof v === "function" ? v(get(imageListAtom)) : v;
-    set(imageListAtom, finalV);
-    localforage.setItem("imageList", finalV);
   },
 );
 
@@ -74,7 +57,7 @@ export const refreshOrderAtom = atom(null, async (get, set) => {
           clipType: "auto",
           layout: "horizontal",
           autoToning: false,
-          angle: undefined,
+          rotate: undefined,
           ...(imageInfos[image.id]?.edited_params || {}),
         },
       }));

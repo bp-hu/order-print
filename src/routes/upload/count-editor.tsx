@@ -1,4 +1,4 @@
-import { imageListAtom, totalAtom } from "@/stores";
+import { orderAtom, totalAtom } from "@/stores";
 import { IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, Input, Modal, SideSheet } from "@douyinfe/semi-ui";
 import { useAtomValue } from "jotai";
@@ -15,7 +15,7 @@ export function CountEditor({
 }) {
   const [count, setCount] = useState(1);
   const total = useAtomValue(totalAtom);
-  const imageList = useAtomValue(imageListAtom);
+  const order = useAtomValue(orderAtom);
 
   return (
     <SideSheet
@@ -57,7 +57,7 @@ export function CountEditor({
           theme="solid"
           className="w-full"
           onClick={() => {
-            if (imageList.length * count > total) {
+            if ((order?.images?.length || 0) * count > total) {
               Modal.error({
                 title: "重要提示",
                 content: "超过最大照片数量",

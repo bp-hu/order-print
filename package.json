@@ -38,7 +38,6 @@
     "@tailwindcss/postcss": "^4.1.18",
     "dayjs": "^1.11.19",
     "jotai": "^2.17.1",
-    "localforage": "^1.10.0",
     "qs": "^6.15.0",
     "react": "~18.3.0",
     "react-dom": "~18.3.0",

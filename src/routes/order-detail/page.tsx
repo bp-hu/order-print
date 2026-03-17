@@ -1,6 +1,6 @@
 import { orderAtom, orderIdAtom } from "@/stores";
 import { IconUpload } from "@douyinfe/semi-icons";
-import { Button, Divider, Image, Typography } from "@douyinfe/semi-ui";
+import { Button, Divider, Typography } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
 import { useAtomValue, useSetAtom } from "jotai";
 import History from "./history";
@@ -33,16 +33,12 @@ export default () => {
       <Divider layout="horizontal" />
       <div className="shadow-md p-md rounded-md flex gap-3xs">
         <div className="flex gap-lg">
-          <Image
-            width={100}
-            src="https://images.unsplash.com/photo-1549298916-b41d501d3772"
-          />
-          <div className="ml-auot flex flex-col gap-3xs">
+          <div className="ml-auot flex flex-col gap-3xs font-medium">
             <Text type="secondary">订单号：{order?.order_number}</Text>
-            <Text type="secondary">{order?.order_name}</Text>
+            <Text type="secondary">订单名称：{order?.order_name}</Text>
           </div>
         </div>
-        <div className="ml-auto flex flex-col gap-md">
+        <div className="ml-auto flex flex-col gap-xs">
           <Button
             size="small"
             icon={<IconUpload />}

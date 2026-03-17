@@ -1,12 +1,12 @@
 import { IconForward, IconReply } from "@douyinfe/semi-icons";
 import { Button, Input } from "@douyinfe/semi-ui";
 
-export function Angle({
-  angle,
-  setAngle,
+export function Rotate({
+  rotate,
+  setRotate,
 }: {
-  angle: number | undefined;
-  setAngle: (angle: number | undefined) => void;
+  rotate: number | undefined;
+  setRotate: (rotate: number | undefined) => void;
 }) {
   return (
     <div className="flex items-center justify-center gap-xs">
@@ -15,17 +15,17 @@ export function Angle({
         size="small"
         icon={<IconReply />}
         onClick={() => {
-          setAngle((angle ?? 0) - 1);
+          setRotate((rotate ?? 0) - 1);
         }}
       />
       <Input
         className="w-[36px] [&>input]:px-3xs"
-        value={angle}
+        value={rotate}
         onChange={(v) => {
-          setAngle(v === "" ? undefined : Number(v));
+          setRotate(v === "" ? undefined : Number(v));
         }}
         onBlur={() => {
-          setAngle(angle ?? 0);
+          setRotate(rotate ?? 0);
         }}
       />
       °
@@ -33,8 +33,8 @@ export function Angle({
         size="small"
         icon={<IconForward />}
         onClick={() => {
-          const nextAngle = (angle ?? 0) + 1;
-          setAngle(nextAngle);
+          const nextRotate = (rotate ?? 0) + 1;
+          setRotate(nextRotate);
         }}
       />
     </div>

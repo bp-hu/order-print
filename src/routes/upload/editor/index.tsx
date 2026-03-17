@@ -19,8 +19,8 @@ import {
 import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 import { ClipPreview } from "../clip-preview";
-import { Angle } from "./angle";
 import { Clip } from "./clip";
+import { Rotate } from "./rotate";
 
 const { Text } = Typography;
 
@@ -173,12 +173,9 @@ function Editor({
               预览
             </Button>
           </div>
-          <Angle
-            angle={editParams.rotate}
-            setAngle={
-              (rotate) => {}
-              //setEditParams({ ...editParams, rotate })
-            }
+          <Rotate
+            rotate={editParams.rotate}
+            setRotate={(rotate) => setEditParams({ ...editParams, rotate })}
           />
           <div className="flex">
             {[
