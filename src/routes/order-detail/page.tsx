@@ -1,3 +1,4 @@
+import { customerConfirm } from "@/servers";
 import { orderAtom, orderIdAtom } from "@/stores";
 import { IconUpload } from "@douyinfe/semi-icons";
 import { Button, Divider, Modal, Typography } from "@douyinfe/semi-ui";
@@ -60,7 +61,7 @@ export default () => {
             className="w-full"
             theme="solid"
             type="danger"
-            onClick={() => {
+            onClick={async () => {
               if (imageCount < maxCount) {
                 Modal.error({
                   width: "100vw",
@@ -69,6 +70,7 @@ export default () => {
                 });
                 return;
               }
+              await customerConfirm(order?.order_number || "");
             }}
           >
             提交印刷

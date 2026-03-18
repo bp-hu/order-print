@@ -35,3 +35,6 @@ export const recoverHistoryImageList = (orderId: string, imageIds: string[]) =>
   http.get(`/images/${orderId}/${imageIds.join(",")}/recover_history`);
 
 export const getPhotoSizeList = () => http.get(`/param/photo-sizes`);
+
+export const customerConfirm = (orderId: string) =>
+  http.post(`/orders/${orderId}/customer_confirm`);
