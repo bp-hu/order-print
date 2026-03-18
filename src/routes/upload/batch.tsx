@@ -1,6 +1,7 @@
 import { deleteImageList, updateImageListParams } from "@/servers";
 import { orderAtom } from "@/stores";
-import { EditParams } from "@/typings";
+import { ClipType, EditParams } from "@/typings";
+import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
 import {
   IconAlertTriangle,
@@ -9,7 +10,7 @@ import {
   IconEdit,
   IconImage,
 } from "@douyinfe/semi-icons";
-import { Button, Modal, SideSheet, Switch, Toast } from "@douyinfe/semi-ui";
+import { Button, Modal, SideSheet, Toast } from "@douyinfe/semi-ui";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { CountEditor } from "./count-editor";
@@ -19,6 +20,53 @@ export function Batch() {
   const [countVisible, setCountVisible] = useState(false);
   const [order, setOrder] = useAtom(orderAtom);
   const imageIds = (order?.images || [])?.map((v) => v.id || "");
+
+  function getNextImages(clipType: ClipType) {
+    return (order?.images || []).map((v) => {
+      const editParams = v.edited_params as EditParams;
+      return {
+        ...v,
+        edited_params: {
+          ...v.edited_params,
+          clipType,
+          ...getPrintParams({
+            pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
+            layout: editParams.layout,
+            clipType,
+            imageSize: [
+              editParams.naturalWidth || 0,
+              editParams.naturalHeight || 0,
+            ],
+            clipPosPercent: [editParams.clipTopPercent || 0, 0],
+            clipSizePercent: [0, editParams.clipHeightPercent || 0],
+          }),
+        },
+      };
+    });
+  }
+
+  async function handleBatchClip(clipType: ClipType) {
+    if (!order) {
+      setVisible(false);
+      return;
+    }
+    const nextImages = getNextImages(clipType);
+    await updateImageListParams(
+      order?.order_number || "",
+      nextImages.reduce(
+        (pre, cur) => ({
+          ...pre,
+          [cur.id || ""]: cur.edited_params,
+        }),
+        {},
+      ),
+    );
+    setOrder({
+      ...order,
+      images: nextImages,
+    });
+    setVisible(false);
+  }
 
   return (
     <>
@@ -44,32 +92,26 @@ export function Batch() {
         placement="bottom"
       >
         <div className="flex flex-col gap-md">
-          <div className="flex items-center gap-xs">
+          {/* <div className="flex items-center gap-xs">
             自动调色
             <Switch />
-          </div>
+          </div> */}
           <div className="flex">
             {[
               {
                 icon: <IconColorPalette />,
                 label: "智能裁剪",
-                onClick: () => {
-                  setVisible(false);
-                },
+                onClick: () => handleBatchClip("auto"),
               },
               {
                 icon: <IconImage />,
                 label: "两边留白",
-                onClick: () => {
-                  setVisible(false);
-                },
+                onClick: () => handleBatchClip("margin"),
               },
               {
                 icon: <IconImage />,
                 label: "单边留白",
-                onClick: () => {
-                  setVisible(false);
-                },
+                onClick: () => handleBatchClip("single"),
               },
             ].map((v) => (
               <div

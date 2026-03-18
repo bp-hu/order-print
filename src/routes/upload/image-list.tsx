@@ -3,6 +3,7 @@ import { orderAtom, paperRatioAtom, totalAtom } from "@/stores";
 import { http } from "@/utils/http";
 import { IconDelete, IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
+import { useUpdateEffect } from "@safe-fe/hooks";
 import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 import { ClipPreview } from "./clip-preview";
@@ -32,6 +33,12 @@ function ImageContainer({
     clipHeightPercent,
   } = image?.edited_params ?? {};
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
+
+  useUpdateEffect(() => {
+    if (tempCount !== count) {
+      setTempCount(count);
+    }
+  }, [tempCount, count]);
 
   return (
     <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-2xs rounded-md border border-border-0 shadow-md">

@@ -58,6 +58,7 @@ export default () => {
               action="https://api.semi.design/upload"
               showUploadList={false}
               multiple
+              limit={total - count}
               beforeUpload={({ fileList }) => {
                 if (count + fileList.length > total) {
                   single(
