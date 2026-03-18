@@ -22,7 +22,10 @@ export function Rotate({
         className="w-[36px] [&>input]:px-3xs"
         value={rotate}
         onChange={(v) => {
-          setRotate(v === "" ? undefined : Number(v));
+          const nextRotate = Number(v);
+          setRotate(
+            v === "" || Number.isNaN(nextRotate) ? undefined : nextRotate,
+          );
         }}
         onBlur={() => {
           setRotate(rotate ?? 0);

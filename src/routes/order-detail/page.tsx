@@ -1,9 +1,8 @@
 import { orderAtom, orderIdAtom } from "@/stores";
 import { IconUpload } from "@douyinfe/semi-icons";
-import { Button, Divider, Typography } from "@douyinfe/semi-ui";
+import { Button, Divider, Modal, Typography } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
 import { useAtomValue, useSetAtom } from "jotai";
-import History from "./history";
 
 const { Text } = Typography;
 
@@ -11,6 +10,9 @@ export default () => {
   const navigate = useNavigate();
   const order = useAtomValue(orderAtom);
   const setOrderId = useSetAtom(orderIdAtom);
+  const imageCount = order?.images?.length || 0;
+  const maxCount = order?.max_photo_count || 0;
+  const isDesigned = imageCount > 0;
 
   return (
     <div className="flex flex-col gap-md">
@@ -47,11 +49,32 @@ export default () => {
               navigate(`/upload?id=${order?.order_number}`);
             }}
           >
-            上传图片
+            {isDesigned ? "修改设计" : "上传图片"}
           </Button>
-          <History />
+          {/* <History /> */}
         </div>
       </div>
+      {isDesigned ? (
+        <div>
+          <Button
+            className="w-full"
+            theme="solid"
+            type="danger"
+            onClick={() => {
+              if (imageCount < maxCount) {
+                Modal.error({
+                  width: "100vw",
+                  title: "重要提示",
+                  content: `当前照片数不足 ${maxCount}，不允许提交`,
+                });
+                return;
+              }
+            }}
+          >
+            提交印刷
+          </Button>
+        </div>
+      ) : null}
       {/* {imageList.length < 10 ? (
         <div className="typo-sm text-danger flex items-center gap-3xs">
           <IconInfoCircle size="small" />

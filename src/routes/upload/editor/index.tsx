@@ -4,7 +4,6 @@ import { EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
 import {
-  IconClose,
   IconColorPalette,
   IconEyeOpened,
   IconImage,
@@ -19,6 +18,7 @@ import {
 import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 import { ClipPreview } from "../clip-preview";
+import { PreviewPrint } from "../preview-print";
 import { Clip } from "./clip";
 import { Rotate } from "./rotate";
 
@@ -49,6 +49,8 @@ function Editor({
       visible={visible}
       onCancel={async () => {
         setVisible(false);
+        setPreviewVisible(false);
+
         const orderId = order?.order_number;
         if (orderId && image) {
           const nextEditParams = {
@@ -217,33 +219,12 @@ function Editor({
           </div>
         </div>
       </div>
-      {previewVisible ? (
-        <div className="fixed left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-black/50">
-          <IconClose
-            className="absolute top-[24px] right-[24px] text-[24px] text-white"
-            onClick={() => setPreviewVisible(false)}
-          />
-          <ClipPreview
-            paperRatio={paperRatio}
-            clipType={editParams.clipType}
-            layout={editParams.layout}
-            src={src}
-            ready={visible}
-            rotate={editParams.rotate}
-            clipPosPercent={[
-              editParams.clipLeftPercent || 0,
-              editParams.clipTopPercent || 0,
-            ]}
-            clipSizePercent={[
-              editParams.clipWidthPercent || 0,
-              editParams.clipHeightPercent || 0,
-            ]}
-            imageSize={[
-              editParams.naturalWidth || 0,
-              editParams.naturalHeight || 0,
-            ]}
-          />
-        </div>
+      {visible && previewVisible ? (
+        <PreviewPrint
+          showTrigger={false}
+          defaultVisible={true}
+          images={[`${src}/edited`]}
+        />
       ) : null}
     </SideSheet>
   );

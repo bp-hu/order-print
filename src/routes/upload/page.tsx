@@ -48,7 +48,9 @@ export default () => {
     <>
       <div className="flex flex-col h-[calc(100vh-72px)]">
         <div className="flex flex-wrap gap-xs">
-          <PreviewPrint />
+          <PreviewPrint
+            images={order?.images?.map((item) => `${item.url}/edited`) || []}
+          />
           <div className="flex items-center gap-xs ml-auto">
             <ImageHistory />
             <Upload

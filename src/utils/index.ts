@@ -66,9 +66,9 @@ export function getClipSize({
       frameWidth,
       frameHeight,
       imageWidth:
-        imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width,
+        imageRatio < paperRatio ? frameWidth : (frameHeight / height) * width,
       imageHeight:
-        imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight,
+        imageRatio < paperRatio ? (frameWidth / width) * height : frameHeight,
     };
   }
 }
