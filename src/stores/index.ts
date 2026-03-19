@@ -16,6 +16,18 @@ export const orderIdAtom = atom(
   },
 );
 
+export const showPrintTipAtom = atom(
+  localStorage.getItem("showPrintTip") || "",
+  (_, set, visible: boolean = true) => {
+    set(showPrintTipAtom, visible);
+    if (visible) {
+      localStorage.setItem("showPrintTip", "");
+    } else {
+      localStorage.removeItem("showPrintTip");
+    }
+  },
+);
+
 export const orderAtom = atom<IOrder | undefined>(undefined);
 export const orderLoadingAtom = atom<boolean>(false);
 export const refreshOrderAtom = atom(null, async (get, set) => {

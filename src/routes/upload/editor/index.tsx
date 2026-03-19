@@ -20,7 +20,6 @@ import { useState } from "react";
 import { ClipPreview } from "../clip-preview";
 import { PreviewPrint } from "../preview-print";
 import { Clip } from "./clip";
-import { Rotate } from "./rotate";
 
 const { Text } = Typography;
 
@@ -175,10 +174,10 @@ function Editor({
               预览
             </Button>
           </div>
-          <Rotate
+          {/* <Rotate
             rotate={editParams.rotate}
             setRotate={(rotate) => setEditParams({ ...editParams, rotate })}
-          />
+          /> */}
           <div className="flex">
             {[
               {

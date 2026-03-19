@@ -1,47 +1,22 @@
-import { PHOTO_SIZES } from "@/consts";
-import {
-  countAtom,
-  orderAtom,
-  orderIdAtom,
-  refreshOrderAtom,
-  totalAtom,
-} from "@/stores";
-import { single } from "@/utils";
-import { getImageSize } from "@/utils/get-image-size";
-import { http } from "@/utils/http";
-import { IconSave, IconUpload } from "@douyinfe/semi-icons";
+import { countAtom, orderAtom, totalAtom } from "@/stores";
+import { IconSave } from "@douyinfe/semi-icons";
 import { IllustrationNoContent } from "@douyinfe/semi-illustrations";
 import { Badge, Button, Empty, Modal, Toast, Upload } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
-import { useRequest } from "@safe-fe/hooks";
-import { useAtomValue, useSetAtom } from "jotai";
-import { stringify } from "qs";
+import { useAtomValue } from "jotai";
 import { useRef, useState } from "react";
 import { Batch } from "./batch";
 import ImageHistory from "./image-history";
 import ImageList from "./image-list";
 import { PreviewPrint } from "./preview-print";
+import { Uploader } from "./uploader";
 
 export default () => {
   const [previewVisible, setPreviewVisible] = useState<boolean>(false);
   const navigate = useNavigate();
-  const orderId = useAtomValue(orderIdAtom);
   const total = useAtomValue(totalAtom);
   const count = useAtomValue(countAtom);
-  const refreshOrder = useSetAtom(refreshOrderAtom);
   const uploadRef = useRef<Upload>(null);
-  const { run: upload } = useRequest(
-    ({ query, body, onUploadProgress, onSuccess, onError }) =>
-      http
-        .post(`/images?${stringify(query)}`, body, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress,
-        })
-        .then((res) => onSuccess(res))
-        .catch((err) => onError(err)),
-  );
   const order = useAtomValue(orderAtom);
 
   return (
@@ -53,86 +28,7 @@ export default () => {
           />
           <div className="flex items-center gap-xs ml-auto">
             <ImageHistory />
-            <Upload
-              ref={uploadRef}
-              action="https://api.semi.design/upload"
-              showUploadList={false}
-              multiple
-              limit={total - count}
-              beforeUpload={({ fileList }) => {
-                if (count + fileList.length > total) {
-                  single(
-                    "upload-error",
-                    () =>
-                      new Promise((resolve, reject) => {
-                        Modal.error({
-                          width: "100vw",
-                          content: `照片数量不能超过 ${total} 张`,
-                          onOk: resolve,
-                          onCancel: reject,
-                        });
-                      }),
-                  );
-                  return {
-                    shouldUpload: false,
-                  };
-                }
-
-                return {
-                  shouldUpload: true,
-                };
-              }}
-              customRequest={async ({
-                fileInstance,
-                onProgress,
-                onSuccess,
-                onError,
-              }) => {
-                const formData = new FormData();
-                formData.append("file", fileInstance);
-                const imageSize = await getImageSize(fileInstance);
-                const photoSize =
-                  PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
-                upload({
-                  query: {
-                    order_id: orderId,
-                    edit_params: JSON.stringify({
-                      count: 1,
-                      paper_w: photoSize?.w,
-                      paper_h: photoSize?.h,
-                      naturalWidth: imageSize.naturalWidth,
-                      naturalHeight: imageSize.naturalHeight,
-                    }),
-                  },
-                  body: formData,
-                  onUploadProgress(e: any) {
-                    onProgress({
-                      total: e.total,
-                      loaded: e.loaded,
-                    });
-                  },
-                  onSuccess(res: any) {
-                    onSuccess(res);
-                    refreshOrder();
-                  },
-                  onError(err: any) {
-                    onError(err);
-                  },
-                });
-                // const imageUrl = await fileToDataURL(fileInstance);
-                // setImageList((prev: any) => [
-                //   ...prev,
-                //   {
-                //     url: imageUrl,
-                //     count: 1,
-                //   },
-                // ]);
-              }}
-            >
-              <Button size="small" icon={<IconUpload />} theme="solid">
-                上传图片
-              </Button>
-            </Upload>
+            <Uploader ref={uploadRef} />
             <Badge type="danger" count={total} countClassName="right-[6px]">
               <Button size="small" theme="borderless">
                 {order?.photo_size}

@@ -1,15 +1,17 @@
-import { orderIdAtom } from "@/stores";
+import { orderIdAtom, showPrintTipAtom } from "@/stores";
 import { http } from "@/utils/http";
 import { Button, Input } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
 import { useRequest } from "@safe-fe/hooks";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 
 export default () => {
   const navigate = useNavigate();
   const [orderId, setOrderId] = useAtom(orderIdAtom);
+  const setShowPrintTip = useSetAtom(showPrintTipAtom);
   const { run: getOrderDetail, loading } = useRequest(() =>
     http.get(`/orders/${orderId}`).then(() => {
+      setShowPrintTip(true);
       navigate(`/order-detail?id=${orderId}`);
     }),
   );
