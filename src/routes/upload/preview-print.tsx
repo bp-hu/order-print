@@ -4,20 +4,27 @@ import {
   IconClose,
 } from "@douyinfe/semi-icons";
 import { Button } from "@douyinfe/semi-ui";
+import { useUpdateEffect } from "@safe-fe/hooks";
 import { useState } from "react";
 
 export function PreviewPrint({
   images = [],
   defaultVisible = false,
+  onVisibleChange,
   showTrigger = true,
 }: {
   images: string[];
   defaultVisible?: boolean;
   showTrigger?: boolean;
+  onVisibleChange?: (visible: boolean) => void;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [previewVisible, setPreviewVisible] = useState<boolean>(defaultVisible);
   const currentImage = images[currentIndex];
+
+  useUpdateEffect(() => {
+    onVisibleChange?.(previewVisible);
+  }, [previewVisible]);
 
   return (
     <>

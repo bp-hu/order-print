@@ -41,6 +41,48 @@ function Editor({
   );
   const [previewVisible, setPreviewVisible] = useState(false);
 
+  async function updateEditParams() {
+    const orderId = order?.order_number;
+    if (orderId && image) {
+      const nextEditParams = {
+        ...editParams,
+        ...getPrintParams({
+          pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
+          layout: editParams.layout,
+          clipType: editParams.clipType,
+          imageSize: [
+            editParams.naturalWidth || 0,
+            editParams.naturalHeight || 0,
+          ],
+          clipPosPercent: [
+            editParams.clipTopPercent || 0,
+            editParams.clipLeftPercent || 0,
+          ],
+          clipSizePercent: [
+            editParams.clipWidthPercent || 0,
+            editParams.clipHeightPercent || 0,
+          ],
+        }),
+      };
+      await updateImageParams({
+        orderId,
+        imageId: image.id,
+        params: nextEditParams,
+      });
+      setOrder({
+        ...order,
+        images: order.images.map((item) =>
+          item.id === image.id
+            ? {
+                ...item,
+                edited_params: nextEditParams,
+              }
+            : item,
+        ),
+      });
+    }
+  }
+
   return (
     <SideSheet
       title={null}
@@ -50,39 +92,7 @@ function Editor({
         setVisible(false);
         setPreviewVisible(false);
 
-        const orderId = order?.order_number;
-        if (orderId && image) {
-          const nextEditParams = {
-            ...editParams,
-            ...getPrintParams({
-              pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
-              layout: editParams.layout,
-              clipType: editParams.clipType,
-              imageSize: [
-                editParams.naturalWidth || 0,
-                editParams.naturalHeight || 0,
-              ],
-              clipPosPercent: [editParams.clipTopPercent || 0, 0],
-              clipSizePercent: [0, editParams.clipHeightPercent || 0],
-            }),
-          };
-          await updateImageParams({
-            orderId,
-            imageId: image.id,
-            params: nextEditParams,
-          });
-          setOrder({
-            ...order,
-            images: order.images.map((item) =>
-              item.id === image.id
-                ? {
-                    ...item,
-                    edited_params: nextEditParams,
-                  }
-                : item,
-            ),
-          });
-        }
+        await updateEditParams();
       }}
       headerStyle={{
         display: "none",
@@ -169,7 +179,10 @@ function Editor({
             <Button
               theme="borderless"
               icon={<IconEyeOpened />}
-              onClick={() => setPreviewVisible(true)}
+              onClick={async () => {
+                await updateEditParams();
+                setPreviewVisible(true);
+              }}
             >
               预览
             </Button>
@@ -222,6 +235,7 @@ function Editor({
         <PreviewPrint
           showTrigger={false}
           defaultVisible={true}
+          onVisibleChange={setPreviewVisible}
           images={[`${src}/edited`]}
         />
       ) : null}

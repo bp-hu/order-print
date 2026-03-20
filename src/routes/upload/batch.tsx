@@ -37,8 +37,14 @@ export function Batch() {
               editParams.naturalWidth || 0,
               editParams.naturalHeight || 0,
             ],
-            clipPosPercent: [editParams.clipTopPercent || 0, 0],
-            clipSizePercent: [0, editParams.clipHeightPercent || 0],
+            clipPosPercent: [
+              editParams.clipTopPercent || 0,
+              editParams.clipLeftPercent || 0,
+            ],
+            clipSizePercent: [
+              editParams.clipWidthPercent || 0,
+              editParams.clipHeightPercent || 0,
+            ],
           }),
         },
       };

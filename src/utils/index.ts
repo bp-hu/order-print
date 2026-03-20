@@ -29,6 +29,7 @@ export function getClipSize({
       width > height ? containerWidth : (containerHeight / height) * width;
     const frameHeight =
       width > height ? (containerWidth / width) * height : containerHeight;
+
     const imageWidth =
       width > height ? containerWidth : (containerHeight / height) * width;
     const imageHeight =
@@ -90,7 +91,12 @@ export function getPrintParams({
   const paperRatio = pageSize[0] / pageSize[1];
   const imageRatio = imageSize[0] / imageSize[1];
   const isAuto = clipType === "auto";
-  const { frameHeight, frameWidth } = getClipSize({
+  const {
+    frameHeight,
+    frameWidth,
+    imageWidth: zoomImageWidth,
+    imageHeight: zoomImageHeight,
+  } = getClipSize({
     ...props,
     paperRatio,
     isAuto,
@@ -98,15 +104,15 @@ export function getPrintParams({
     imageSize,
   });
 
-  const imageWidth = (pageWidth / frameWidth) * imageSize[0];
-  const imageHeight = (pageHeight / frameHeight) * imageSize[1];
+  const imageWidth = (pageWidth / frameWidth) * zoomImageWidth;
+  const imageHeight = (pageHeight / frameHeight) * zoomImageHeight;
   const blankWidth = pageWidth - imageWidth;
   const blankHeight = pageHeight - imageHeight;
 
   // 单边留白
   if (clipType === "single") {
     // 左右留白
-    if (imageRatio <= paperRatio) {
+    if (frameWidth > zoomImageWidth) {
       return {
         start_x: 0,
         start_y: 0,
@@ -139,7 +145,7 @@ export function getPrintParams({
   // 双边留白
   if (clipType === "margin") {
     // 左右留白
-    if (imageRatio <= paperRatio) {
+    if (frameWidth > zoomImageWidth) {
       return {
         start_x: 0,
         start_y: 0,

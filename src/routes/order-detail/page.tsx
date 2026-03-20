@@ -18,7 +18,7 @@ export default () => {
 
   return (
     <>
-      {showPrintTip ? (
+      {showPrintTip && isDesigned ? (
         <div className="fixed left-0 top-0 w-full h-full bg-black/50">
           <div className="absolute top-[250px] text-white p-md">
             <div
