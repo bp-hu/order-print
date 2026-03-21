@@ -13,7 +13,7 @@ export default defineConfig({
     hmr: process.env.NODE_ENV !== "production",
     port: PORT,
     client: { protocol: "ws", host: "localhost", port: `${PORT}` },
-    startUrl: "http://120.48.87.222/",
+    startUrl: "http://47.102.196.29/",
   },
   plugins: [
     appTools({

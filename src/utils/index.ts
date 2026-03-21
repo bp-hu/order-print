@@ -43,35 +43,26 @@ export function getClipSize({
     };
   }
 
+  let frameWidth = 0;
+  let frameHeight = 0;
   if (layout === "horizontal") {
-    const frameHeight =
-      paperRatio < 1
-        ? containerWidth * paperRatio
-        : containerHeight / paperRatio;
-    const frameWidth = containerWidth;
-
-    return {
-      frameWidth,
-      frameHeight,
-      imageWidth:
-        imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width,
-      imageHeight:
-        imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight,
-    };
+    frameWidth = containerWidth;
+    frameHeight =
+      paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
   } else {
-    const frameHeight = containerHeight;
-    const frameWidth =
+    frameHeight = containerHeight;
+    frameWidth =
       paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
-
-    return {
-      frameWidth,
-      frameHeight,
-      imageWidth:
-        imageRatio < paperRatio ? frameWidth : (frameHeight / height) * width,
-      imageHeight:
-        imageRatio < paperRatio ? (frameWidth / width) * height : frameHeight,
-    };
   }
+
+  return {
+    frameWidth,
+    frameHeight,
+    imageWidth:
+      imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width,
+    imageHeight:
+      imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight,
+  };
 }
 
 export function getPrintParams({
