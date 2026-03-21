@@ -1,5 +1,5 @@
 import { deleteImageList, updateImageListParams } from "@/servers";
-import { orderAtom } from "@/stores";
+import { imageCacheAtom, orderAtom } from "@/stores";
 import { ClipType, EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
@@ -11,7 +11,7 @@ import {
   IconImage,
 } from "@douyinfe/semi-icons";
 import { Button, Modal, SideSheet, Toast } from "@douyinfe/semi-ui";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useState } from "react";
 import { CountEditor } from "./count-editor";
 
@@ -20,6 +20,7 @@ export function Batch() {
   const [countVisible, setCountVisible] = useState(false);
   const [order, setOrder] = useAtom(orderAtom);
   const imageIds = (order?.images || [])?.map((v) => v.id || "");
+  const setImageCache = useSetAtom(imageCacheAtom);
 
   function getNextImages(clipType: ClipType) {
     return (order?.images || []).map((v) => {
@@ -164,6 +165,7 @@ export function Batch() {
                       ...order,
                       images: [],
                     });
+                    setImageCache([]);
                     Toast.success("删除成功");
                   }
 

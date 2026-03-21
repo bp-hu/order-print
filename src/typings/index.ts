@@ -27,6 +27,7 @@ export type EditParams = {
 export type TImage = {
   id: string;
   url: string;
+  preview_url: string;
   filename: string;
   content_type: string;
   size: number;

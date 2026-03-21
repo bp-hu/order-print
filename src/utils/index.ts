@@ -230,3 +230,14 @@ export function encryptBase64(str: string) {
 export function decryptBase64(encrypted: string) {
   return decodeURIComponent(atob(encrypted));
 }
+
+export function fileToDataURL(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function (e: any) {
+      resolve(e.target.result); // data:image/png;base64,...
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}

@@ -1,9 +1,9 @@
 import { updateImageParams } from "@/servers";
-import { orderAtom, paperRatioAtom, totalAtom } from "@/stores";
+import { imageCacheAtom, orderAtom, paperRatioAtom, totalAtom } from "@/stores";
 import { http } from "@/utils/http";
 import { IconDelete, IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
 import { ClipPreview } from "./clip-preview";
 import Editor from "./editor";
@@ -34,6 +34,7 @@ function ImageContainer({
   const countRef = useRef(count);
   countRef.current = count;
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
+  const setImageCache = useSetAtom(imageCacheAtom);
 
   // useUpdateEffect(() => {
   //   if (tempCount !== count) {
@@ -44,7 +45,8 @@ function ImageContainer({
   return (
     <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-2xs rounded-md border border-border-0 shadow-md">
       <ClipPreview
-        src={url}
+        src={image?.preview_url || url}
+        imageId={image?.id || ""}
         layout={layout}
         clipType={clipType}
         size={[160, 160]}
@@ -91,6 +93,9 @@ function ImageContainer({
                             ],
                           });
                         });
+                      setImageCache((prev: any) =>
+                        prev.filter((item) => item.key !== image?.id),
+                      );
                     },
                   });
                 }}

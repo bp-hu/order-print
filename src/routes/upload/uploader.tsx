@@ -1,12 +1,13 @@
 import { PHOTO_SIZES } from "@/consts";
 import {
   countAtom,
+  imageCacheAtom,
   orderAtom,
   orderIdAtom,
   refreshOrderAtom,
   totalAtom,
 } from "@/stores";
-import { single } from "@/utils";
+import { fileToDataURL, single } from "@/utils";
 import { getImageSize } from "@/utils/get-image-size";
 import { http } from "@/utils/http";
 import { IconUpload } from "@douyinfe/semi-icons";
@@ -21,6 +22,7 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
   const count = useAtomValue(countAtom);
   const order = useAtomValue(orderAtom);
   const refreshOrder = useSetAtom(refreshOrderAtom);
+  const setImageCache = useSetAtom(imageCacheAtom);
   const orderId = useAtomValue(orderIdAtom);
   const [uploading, setUploading] = useState<boolean>(false);
   const totalRef = useRef<number>(0);
@@ -84,6 +86,7 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
           totalRef.current = fileList.filter(
             (v) => v.status === "uploading" && v.shouldUpload !== false,
           ).length;
+
           return {
             shouldUpload: true,
           };
@@ -117,7 +120,7 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                 loaded: e.loaded,
               });
             },
-            onSuccess(res: any) {
+            async onSuccess(res: any) {
               onSuccess(res);
 
               const nextIndex = currentIndexRef.current + 1;
@@ -126,6 +129,12 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                 setUploading(false);
                 refreshOrder();
               }
+
+              const imgUrl = await fileToDataURL(fileInstance);
+              setImageCache((prev: any) => [
+                ...prev,
+                { url: imgUrl, key: res.key },
+              ]);
             },
             onError(err: any) {
               onError(err);

@@ -108,7 +108,8 @@ function Editor({
           paperRatio={paperRatio}
           clipType={editParams.clipType}
           layout={editParams.layout}
-          src={src}
+          src={image?.preview_url || src}
+          imageId={image?.id || ""}
           ready={visible}
           rotate={editParams.rotate}
           clipPosPercent={[

@@ -1,7 +1,9 @@
+import { imageCacheAtom } from "@/stores";
 import type { ClipLayout, ClipType } from "@/typings";
 import { getClipSize } from "@/utils";
 import { cn } from "@auix/utils";
 import { Image } from "@douyinfe/semi-ui";
+import { useAtom } from "jotai";
 import { ReactNode, useEffect, useState } from "react";
 import { ClipOverlay } from "./clip-overlay";
 
@@ -10,6 +12,7 @@ export const ClipPreview = ({
   clipType,
   layout = "horizontal",
   src,
+  imageId,
   size = [400, 400],
   ready = false,
   className,
@@ -22,6 +25,7 @@ export const ClipPreview = ({
 }: {
   paperRatio: number;
   src: string;
+  imageId?: string;
   clipType?: ClipType;
   clipPosPercent?: [number, number];
   clipSizePercent?: [number, number];
@@ -53,6 +57,7 @@ export const ClipPreview = ({
     imageHeight: 0,
   });
   const [inited, setInited] = useState(false);
+  const [imageCache, setImageCache] = useAtom(imageCacheAtom);
 
   useEffect(() => {
     if (ready && layout) {
@@ -129,7 +134,27 @@ export const ClipPreview = ({
           }
           className="transform rotate-(--rotate-rotate) w-(--width) h-(--height)"
         >
-          <img className="w-full h-full" src={src} alt="" />
+          <img
+            className="w-full h-full"
+            src={src}
+            alt=""
+            onLoad={function (e) {
+              if (imageCache.find((v) => v.key === imageId)) {
+                return;
+              }
+              const img = e.target as HTMLImageElement;
+              const canvas = document.createElement("canvas");
+              canvas.width = img.naturalWidth;
+              canvas.height = img.naturalHeight;
+              const ctx = canvas.getContext("2d");
+              ctx?.drawImage(img, 0, 0);
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+              setImageCache((prev) => [
+                ...prev,
+                { key: imageId, url: dataUrl },
+              ]);
+            }}
+          />
         </div>
         {(typeof children === "function"
           ? children({

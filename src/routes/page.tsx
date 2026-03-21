@@ -1,4 +1,4 @@
-import { orderIdAtom, showPrintTipAtom } from "@/stores";
+import { imageCacheAtom, orderIdAtom, showPrintTipAtom } from "@/stores";
 import { http } from "@/utils/http";
 import { Button, Input } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
@@ -9,9 +9,11 @@ export default () => {
   const navigate = useNavigate();
   const [orderId, setOrderId] = useAtom(orderIdAtom);
   const setShowPrintTip = useSetAtom(showPrintTipAtom);
+  const setImageCache = useSetAtom(imageCacheAtom);
   const { run: getOrderDetail, loading } = useRequest(() =>
     http.get(`/orders/${orderId}`).then(() => {
       setShowPrintTip(true);
+      setImageCache([]);
       navigate(`/order-detail?id=${orderId}`);
     }),
   );

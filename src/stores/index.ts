@@ -3,6 +3,7 @@ import { getImageInfoList } from "@/servers";
 import { IOrder } from "@/typings/index";
 import { http } from "@/utils/http";
 import { atom } from "jotai";
+import localforage from "localforage";
 
 export const orderIdAtom = atom(
   localStorage.getItem("orderId") || "",
@@ -61,9 +62,12 @@ export const refreshOrderAtom = atom(null, async (get, set) => {
         },
         {} as Record<string, any>,
       );
+      const imageCache = get(imageCacheAtom);
       nextOrder.images = (nextOrder.images || []).map((image: any) => ({
         ...image,
         ...imageInfos[image.id],
+        preview_url:
+          imageCache.find((v) => v.key === image.id)?.url || image.url,
         edited_params: {
           count: 1,
           clipType: "auto",
@@ -95,4 +99,16 @@ export const countAtom = atom<number>(
       (acc, cur) => acc + cur.edited_params?.count,
       0,
     ) || 0,
+);
+
+export const imageCacheAtom = atom(
+  [] as {
+    url: string;
+    key: string;
+  }[],
+  (get, set, v) => {
+    const finalV = typeof v === "function" ? v(get(imageCacheAtom)) : v;
+    set(imageCacheAtom, finalV);
+    localforage.setItem("imageCache", finalV);
+  },
 );
