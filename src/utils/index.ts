@@ -45,23 +45,32 @@ export function getClipSize({
 
   let frameWidth = 0;
   let frameHeight = 0;
+  let imageWidth = 0;
+  let imageHeight = 0;
   if (layout === "horizontal") {
     frameWidth = containerWidth;
     frameHeight =
       paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
+    imageWidth =
+      imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width;
+    imageHeight =
+      imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight;
   } else {
     frameHeight = containerHeight;
     frameWidth =
       paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
+
+    imageWidth =
+      imageRatio < paperRatio ? frameWidth : (frameHeight / height) * width;
+    imageHeight =
+      imageRatio < paperRatio ? (frameWidth / width) * height : frameHeight;
   }
 
   return {
     frameWidth,
     frameHeight,
-    imageWidth:
-      imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width,
-    imageHeight:
-      imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight,
+    imageWidth,
+    imageHeight,
   };
 }
 
