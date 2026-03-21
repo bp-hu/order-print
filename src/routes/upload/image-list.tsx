@@ -3,9 +3,8 @@ import { orderAtom, paperRatioAtom, totalAtom } from "@/stores";
 import { http } from "@/utils/http";
 import { IconDelete, IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
-import { useUpdateEffect } from "@safe-fe/hooks";
 import { useAtom, useAtomValue } from "jotai";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ClipPreview } from "./clip-preview";
 import Editor from "./editor";
 
@@ -14,7 +13,7 @@ function ImageContainer({
   setCount,
 }: {
   index: number;
-  setCount: (count: number) => void;
+  setCount: (count: number) => boolean;
 }) {
   const [order, setOrder] = useAtom(orderAtom);
   const paperRatio = useAtomValue(paperRatioAtom);
@@ -32,13 +31,15 @@ function ImageContainer({
     clipWidthPercent,
     clipHeightPercent,
   } = image?.edited_params ?? {};
+  const countRef = useRef(count);
+  countRef.current = count;
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
 
-  useUpdateEffect(() => {
-    if (tempCount !== count) {
-      setTempCount(count);
-    }
-  }, [tempCount, count]);
+  // useUpdateEffect(() => {
+  //   if (tempCount !== count) {
+  //     setTempCount(count);
+  //   }
+  // }, [tempCount, count]);
 
   return (
     <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-2xs rounded-md border border-border-0 shadow-md">
@@ -101,9 +102,12 @@ function ImageContainer({
               icon={<IconMinus />}
               className="rounded-full"
               onClick={() => {
-                const nextCount = count === 1 ? 1 : count - 1;
-                setCount(nextCount);
-                setTempCount(nextCount);
+                const nextCount =
+                  countRef.current === 1 ? 1 : countRef.current - 1;
+                const success = setCount(nextCount);
+                if (success) {
+                  setTempCount(nextCount);
+                }
               }}
             />
           )}
@@ -115,9 +119,12 @@ function ImageContainer({
             }}
             onBlur={() => {
               if (tempCount !== undefined) {
-                setCount(tempCount);
+                const success = setCount(tempCount);
+                if (!success) {
+                  setTempCount(countRef.current);
+                }
               } else {
-                setTempCount(count);
+                setTempCount(countRef.current);
               }
             }}
           />
@@ -126,9 +133,11 @@ function ImageContainer({
             icon={<IconPlus />}
             className="rounded-full"
             onClick={() => {
-              const nextCount = count + 1;
-              setCount(nextCount);
-              setTempCount(nextCount);
+              const nextCount = countRef.current + 1;
+              const success = setCount(nextCount);
+              if (success) {
+                setTempCount(nextCount);
+              }
             }}
           />
         </div>
@@ -179,7 +188,9 @@ export default ({
                   imageId: nextImage.id,
                   params: nextImage.edited_params,
                 });
+                return true;
               }
+              return false;
             }}
           />
         ))}
