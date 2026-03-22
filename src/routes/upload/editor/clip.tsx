@@ -39,32 +39,31 @@ export function Clip({
 
   const { x: clipLeft, y: clipTop } = position;
   // 相对于 paper，照片是纵向的还是横向的
-  const isVertical = imageRatio <= paperRatio;
+  const clipRatio =
+    (layout === "vertical" && paperRatio > 1) ||
+    (layout === "horizontal" && paperRatio <= 1)
+      ? 1 / paperRatio
+      : paperRatio;
   let croppingWidth = 0;
   let croppingHeight = 0;
+  const isVertical = imageRatio <= clipRatio;
 
   // 纵向裁剪
   if (isVertical) {
     croppingWidth = frameWidth;
     croppingHeight =
-      layout === "vertical"
-        ? paperRatio < 1
-          ? croppingWidth / paperRatio
-          : croppingWidth * paperRatio
-        : paperRatio < 1
-          ? croppingWidth * paperRatio
-          : croppingWidth / paperRatio;
+      (layout === "vertical" && clipRatio < 1) ||
+      (layout === "horizontal" && clipRatio >= 1)
+        ? croppingWidth / clipRatio
+        : croppingWidth * clipRatio;
   } else {
     // 横向裁剪
     croppingHeight = frameHeight;
     croppingWidth =
-      layout === "vertical"
-        ? paperRatio < 1
-          ? croppingHeight * paperRatio
-          : croppingHeight / paperRatio
-        : paperRatio < 1
-          ? croppingHeight / paperRatio
-          : croppingHeight * paperRatio;
+      (layout === "vertical" && clipRatio < 1) ||
+      (layout === "horizontal" && clipRatio >= 1)
+        ? croppingHeight * clipRatio
+        : croppingHeight / clipRatio;
   }
 
   const { run: debounceOnMove } = useDebounceFn(onMove, 300);
