@@ -180,8 +180,7 @@ function Editor({
             <Button
               theme="borderless"
               icon={<IconEyeOpened />}
-              onClick={async () => {
-                await updateEditParams();
+              onClick={() => {
                 setPreviewVisible(true);
               }}
             >
@@ -237,7 +236,12 @@ function Editor({
           showTrigger={false}
           defaultVisible={true}
           onVisibleChange={setPreviewVisible}
-          images={[`${src}/edited`]}
+          images={[
+            // `${src}/prevew?${stringify({
+            //   edit_params: editParams,
+            // })}`,
+            `${src}/edit`,
+          ]}
         />
       ) : null}
     </SideSheet>

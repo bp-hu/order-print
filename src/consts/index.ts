@@ -17,7 +17,7 @@ export const PHOTO_SIZES = {
   },
   "5英寸": {
     w: 127,
-    h: 152,
+    h: 89,
   },
   "6英寸": {
     w: 102,

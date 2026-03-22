@@ -11,7 +11,7 @@ interface ClipProps {
 export function getClipSize({
   layout,
   containerSize,
-  paperRatio,
+  paperRatio: paperRatioProp,
   isAuto = false,
   imageSize,
 }: ClipProps): {
@@ -23,6 +23,13 @@ export function getClipSize({
   const [containerWidth, containerHeight] = containerSize;
   const [width, height] = imageSize;
   const imageRatio = width / height;
+
+  const isHorizontal = layout === "horizontal";
+  const isVertical = !isHorizontal;
+  const paperRatio =
+    (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp > 1)
+      ? paperRatioProp / 1
+      : paperRatioProp;
 
   if (isAuto) {
     const frameWidth =
@@ -47,23 +54,31 @@ export function getClipSize({
   let frameHeight = 0;
   let imageWidth = 0;
   let imageHeight = 0;
-  if (layout === "horizontal") {
+
+  if (isHorizontal) {
     frameWidth = containerWidth;
     frameHeight =
       paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
-    imageWidth =
-      imageRatio >= paperRatio ? frameWidth : (frameHeight / height) * width;
-    imageHeight =
-      imageRatio >= paperRatio ? (frameWidth / width) * height : frameHeight;
   } else {
     frameHeight = containerHeight;
     frameWidth =
       paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
-
-    imageWidth =
-      imageRatio < paperRatio ? frameWidth : (frameHeight / height) * width;
-    imageHeight =
-      imageRatio < paperRatio ? (frameWidth / width) * height : frameHeight;
+  }
+  if (
+    (isHorizontal &&
+      (paperRatioProp >= 1
+        ? imageRatio >= paperRatio
+        : imageRatio < paperRatio)) ||
+    (isVertical &&
+      (paperRatioProp >= 1
+        ? imageRatio < paperRatio
+        : imageRatio >= paperRatio))
+  ) {
+    imageWidth = frameWidth;
+    imageHeight = (imageWidth / width) * height;
+  } else {
+    imageHeight = frameHeight;
+    imageWidth = (imageHeight / height) * width;
   }
 
   return {
