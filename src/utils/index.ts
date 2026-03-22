@@ -31,6 +31,21 @@ export function getClipSize({
       ? paperRatioProp / 1
       : paperRatioProp;
 
+  let frameWidth = 0;
+  let frameHeight = 0;
+  let imageWidth = 0;
+  let imageHeight = 0;
+
+  if (isHorizontal) {
+    frameWidth = containerWidth;
+    frameHeight =
+      paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
+  } else {
+    frameHeight = containerHeight;
+    frameWidth =
+      paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
+  }
+
   if (isAuto) {
     const frameWidth =
       width > height ? containerWidth : (containerHeight / height) * width;
@@ -50,20 +65,6 @@ export function getClipSize({
     };
   }
 
-  let frameWidth = 0;
-  let frameHeight = 0;
-  let imageWidth = 0;
-  let imageHeight = 0;
-
-  if (isHorizontal) {
-    frameWidth = containerWidth;
-    frameHeight =
-      paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
-  } else {
-    frameHeight = containerHeight;
-    frameWidth =
-      paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
-  }
   if (
     (isHorizontal &&
       (paperRatioProp >= 1

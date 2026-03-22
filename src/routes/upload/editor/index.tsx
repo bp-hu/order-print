@@ -41,29 +41,33 @@ function Editor({
   );
   const [previewVisible, setPreviewVisible] = useState(false);
 
+  function computeEditParams(editParams: EditParams) {
+    return {
+      ...editParams,
+      ...getPrintParams({
+        pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
+        layout: editParams.layout,
+        clipType: editParams.clipType,
+        imageSize: [
+          editParams.naturalWidth || 0,
+          editParams.naturalHeight || 0,
+        ],
+        clipPosPercent: [
+          editParams.clipTopPercent || 0,
+          editParams.clipLeftPercent || 0,
+        ],
+        clipSizePercent: [
+          editParams.clipWidthPercent || 0,
+          editParams.clipHeightPercent || 0,
+        ],
+      }),
+    };
+  }
+
   async function updateEditParams() {
     const orderId = order?.order_number;
     if (orderId && image) {
-      const nextEditParams = {
-        ...editParams,
-        ...getPrintParams({
-          pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
-          layout: editParams.layout,
-          clipType: editParams.clipType,
-          imageSize: [
-            editParams.naturalWidth || 0,
-            editParams.naturalHeight || 0,
-          ],
-          clipPosPercent: [
-            editParams.clipTopPercent || 0,
-            editParams.clipLeftPercent || 0,
-          ],
-          clipSizePercent: [
-            editParams.clipWidthPercent || 0,
-            editParams.clipHeightPercent || 0,
-          ],
-        }),
-      };
+      const nextEditParams = computeEditParams(editParams);
       await updateImageParams({
         orderId,
         imageId: image.id,
@@ -237,10 +241,7 @@ function Editor({
           defaultVisible={true}
           onVisibleChange={setPreviewVisible}
           images={[
-            // `${src}/prevew?${stringify({
-            //   edit_params: editParams,
-            // })}`,
-            `${src}/edit`,
+            `${src}/preview?edit_params=${JSON.stringify(computeEditParams(editParams))}`,
           ]}
         />
       ) : null}
