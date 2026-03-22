@@ -27,8 +27,8 @@ export function getClipSize({
   const isHorizontal = layout === "horizontal";
   const isVertical = !isHorizontal;
   const paperRatio =
-    (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp > 1)
-      ? paperRatioProp / 1
+    (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1)
+      ? 1 / paperRatioProp
       : paperRatioProp;
 
   let frameWidth = 0;
@@ -65,16 +65,7 @@ export function getClipSize({
     };
   }
 
-  if (
-    (isHorizontal &&
-      (paperRatioProp >= 1
-        ? imageRatio >= paperRatio
-        : imageRatio < paperRatio)) ||
-    (isVertical &&
-      (paperRatioProp >= 1
-        ? imageRatio < paperRatio
-        : imageRatio >= paperRatio))
-  ) {
+  if (paperRatio <= imageRatio) {
     imageWidth = frameWidth;
     imageHeight = (imageWidth / width) * height;
   } else {
