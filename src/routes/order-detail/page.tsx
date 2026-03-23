@@ -1,7 +1,14 @@
 import { customerConfirm } from "@/servers";
-import { orderAtom, orderIdAtom, showPrintTipAtom } from "@/stores";
+import { countAtom, orderAtom, orderIdAtom, showPrintTipAtom } from "@/stores";
 import { IconFilledArrowUp, IconUpload } from "@douyinfe/semi-icons";
-import { Button, Divider, Modal, Typography } from "@douyinfe/semi-ui";
+import {
+  Button,
+  Divider,
+  Modal,
+  Tag,
+  Toast,
+  Typography,
+} from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
@@ -12,9 +19,10 @@ export default () => {
   const order = useAtomValue(orderAtom);
   const setOrderId = useSetAtom(orderIdAtom);
   const [showPrintTip, setShowPrintTip] = useAtom(showPrintTipAtom);
-  const imageCount = order?.images?.length || 0;
   const maxCount = order?.max_photo_count || 0;
-  const isDesigned = imageCount > 0;
+  const count = useAtomValue(countAtom);
+  const isDesigned = count > 0;
+  const isDone = order?.customer_status === "照片已上传";
 
   return (
     <>
@@ -69,27 +77,33 @@ export default () => {
             </div>
           </div>
           <div className="ml-auto flex flex-col gap-xs">
-            <Button
-              size="small"
-              icon={<IconUpload />}
-              theme="solid"
-              onClick={() => {
-                navigate(`/upload?id=${order?.order_number}`);
-              }}
-            >
-              {isDesigned ? "修改设计" : "上传图片"}
-            </Button>
+            {isDone ? (
+              <Tag size="large" color="light-blue" className="font-medium">
+                设计已提交
+              </Tag>
+            ) : (
+              <Button
+                size="small"
+                icon={<IconUpload />}
+                theme="solid"
+                onClick={() => {
+                  navigate(`/upload?id=${order?.order_number}`);
+                }}
+              >
+                {isDesigned ? "修改设计" : "上传图片"}
+              </Button>
+            )}
             {/* <History /> */}
           </div>
         </div>
-        {isDesigned ? (
+        {isDesigned && !isDone ? (
           <div>
             <Button
               className="w-full"
               theme="solid"
               type="danger"
               onClick={async () => {
-                if (imageCount < maxCount) {
+                if (count < maxCount) {
                   Modal.error({
                     width: "100vw",
                     title: "重要提示",
@@ -98,6 +112,7 @@ export default () => {
                   return;
                 }
                 await customerConfirm(order?.order_number || "");
+                Toast.success("提交成功");
               }}
             >
               提交印刷
