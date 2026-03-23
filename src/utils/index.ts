@@ -82,20 +82,20 @@ export function getClipSize({
 }
 
 export function getPrintParams({
-  pageSize,
+  paperSize,
   clipType,
   clipPosPercent,
   clipSizePercent,
   imageSize,
   ...props
 }: Omit<ClipProps, "paperRatio" | "isAuto" | "containerSize"> & {
-  pageSize: [number, number];
+  paperSize: [number, number];
   clipType: ClipType;
   clipPosPercent: [number, number];
   clipSizePercent: [number, number];
 }) {
-  const [pageWidth, pageHeight] = pageSize;
-  const paperRatio = pageSize[0] / pageSize[1];
+  const [paperWidth, paperHeight] = paperSize;
+  const paperRatio = paperSize[0] / paperSize[1];
   const imageRatio = imageSize[0] / imageSize[1];
   const isAuto = clipType === "auto";
   const {
@@ -111,10 +111,10 @@ export function getPrintParams({
     imageSize,
   });
 
-  const imageWidth = (pageWidth / frameWidth) * zoomImageWidth;
-  const imageHeight = (pageHeight / frameHeight) * zoomImageHeight;
-  const blankWidth = pageWidth - imageWidth;
-  const blankHeight = pageHeight - imageHeight;
+  const imageWidth = (paperWidth / frameWidth) * zoomImageWidth;
+  const imageHeight = (paperHeight / frameHeight) * zoomImageHeight;
+  const blankWidth = paperWidth - imageWidth;
+  const blankHeight = paperHeight - imageHeight;
 
   // 单边留白
   if (clipType === "single") {
@@ -185,8 +185,8 @@ export function getPrintParams({
   /** 智能裁剪 */
   // 高度裁剪
   if (imageRatio <= paperRatio) {
-    const clipTop = clipPosPercent[0] * pageHeight;
-    const clipHeight = clipSizePercent[1] * pageHeight;
+    const clipTop = clipPosPercent[0] * paperHeight;
+    const clipHeight = clipSizePercent[1] * paperHeight;
 
     return {
       start_x: 0,
@@ -202,8 +202,8 @@ export function getPrintParams({
     };
   } else {
     // 宽度裁剪
-    const clipLeft = clipPosPercent[1] * pageWidth;
-    const clipWidth = clipSizePercent[0] * pageWidth;
+    const clipLeft = clipPosPercent[1] * paperWidth;
+    const clipWidth = clipSizePercent[0] * paperWidth;
 
     return {
       start_x: clipLeft,

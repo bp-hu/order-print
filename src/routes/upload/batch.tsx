@@ -31,7 +31,7 @@ export function Batch() {
           ...v.edited_params,
           clipType,
           ...getPrintParams({
-            pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
+            paperSize: [editParams.paper_w || 0, editParams.paper_h || 0],
             layout: editParams.layout,
             clipType,
             imageSize: [

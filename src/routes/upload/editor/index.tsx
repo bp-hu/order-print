@@ -45,7 +45,7 @@ function Editor({
     return {
       ...editParams,
       ...getPrintParams({
-        pageSize: [editParams.paper_w || 0, editParams.paper_h || 0],
+        paperSize: [editParams.paper_w || 0, editParams.paper_h || 0],
         layout: editParams.layout,
         clipType: editParams.clipType,
         imageSize: [
