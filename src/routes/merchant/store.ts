@@ -4,17 +4,25 @@ import { atom } from "jotai";
 
 export const orderListAtom = atom<IOrder[]>([]);
 export const loadingAtom = atom<boolean>(false);
+export const customerStatusAtom = atom<string[]>([]);
+export const merchantStatusAtom = atom<string[]>([]);
 export const refreshOrderlistAtom = atom(null, async (_, set) => {
   set(loadingAtom, true);
   try {
-    const res = await http.get(
-      "/orders",
-      {},
-      {
-        withCredentials: false,
-      },
-    );
-    set(orderListAtom, res || []);
+    const [orderList, customerStatus, merchantStatus] = await Promise.all([
+      http.get(
+        "/orders",
+        {},
+        {
+          withCredentials: false,
+        },
+      ),
+      http.get("/param/customer-statuses"),
+      http.get("/param/merchant-statuses"),
+    ]);
+    set(orderListAtom, orderList || []);
+    set(customerStatusAtom, customerStatus || []);
+    set(merchantStatusAtom, merchantStatus || []);
   } finally {
     set(loadingAtom, false);
   }
