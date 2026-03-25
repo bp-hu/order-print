@@ -1,4 +1,6 @@
+import { IS_MERCHANT } from "@/consts";
 import { imageCacheAtom, orderIdAtom, refreshOrderAtom } from "@/stores";
+import { cn } from "@auix/utils";
 import { Outlet, useNavigate } from "@edenx/runtime/router";
 import { useAtom, useSetAtom } from "jotai";
 import localforage from "localforage";
@@ -37,8 +39,13 @@ const Layout = (): JSX.Element => {
           alt="cannon-banner"
         />
       </div>
-      <div className="flex items-center justify-center p-xs">
-        <div className="relative min-w-[360px] max-w-[800px]">
+      <div className="flex items-center justify-center">
+        <div
+          className={cn("relative min-w-[360px]", {
+            "max-w-[800px] p-xs": !IS_MERCHANT,
+            "px-xl": IS_MERCHANT,
+          })}
+        >
           <Outlet />
         </div>
       </div>

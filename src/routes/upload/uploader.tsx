@@ -7,7 +7,7 @@ import {
   refreshOrderAtom,
   totalAtom,
 } from "@/stores";
-import { fileToDataURL, single } from "@/utils";
+import { fileToDataURL, getPrintParams, single } from "@/utils";
 import { getImageSize } from "@/utils/get-image-size";
 import { http } from "@/utils/http";
 import { IconUpload } from "@douyinfe/semi-icons";
@@ -111,6 +111,16 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                 paper_h: photoSize?.h,
                 naturalWidth: imageSize.naturalWidth,
                 naturalHeight: imageSize.naturalHeight,
+                clipType: "margin",
+                layout: "horizontal",
+                ...getPrintParams({
+                  paperSize: [photoSize?.w || 0, photoSize?.h || 0],
+                  clipType: "margin",
+                  layout: "horizontal",
+                  imageSize: [imageSize.naturalWidth, imageSize.naturalHeight],
+                  clipPosPercent: [0, 0],
+                  clipSizePercent: [1, 1],
+                }),
               }),
             },
             body: formData,

@@ -1,3 +1,4 @@
+export const IS_MERCHANT = window.location.pathname.startsWith("/merchant");
 export const PHOTO_SIZES = {
   "1英寸": {
     w: 25,

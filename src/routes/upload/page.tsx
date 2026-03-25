@@ -1,4 +1,4 @@
-import { countAtom, orderAtom, totalAtom } from "@/stores";
+import { countAtom, orderAtom, orderIsDoneAtom, totalAtom } from "@/stores";
 import { IconSave } from "@douyinfe/semi-icons";
 import { IllustrationNoContent } from "@douyinfe/semi-illustrations";
 import { Badge, Button, Empty, Modal, Toast, Upload } from "@douyinfe/semi-ui";
@@ -18,6 +18,7 @@ export default () => {
   const count = useAtomValue(countAtom);
   const uploadRef = useRef<Upload>(null);
   const order = useAtomValue(orderAtom);
+  const isDone = useAtomValue(orderIsDoneAtom);
 
   return (
     <>
@@ -27,8 +28,12 @@ export default () => {
             images={order?.images?.map((item) => `${item.url}/edited`) || []}
           />
           <div className="flex items-center gap-xs ml-auto">
-            <ImageHistory />
-            <Uploader ref={uploadRef} />
+            {isDone ? null : (
+              <>
+                <ImageHistory />
+                <Uploader ref={uploadRef} />
+              </>
+            )}
             <Badge type="danger" count={total} countClassName="right-[6px]">
               <Button size="small" theme="borderless">
                 {order?.photo_size}
@@ -46,10 +51,15 @@ export default () => {
           </Button> */}
           </div>
         </div>
-        <Batch />
-        <div className="mt-xs text-danger typo-sm">
-          虚线框为照片打印区域，不满意可点击“编辑”调整
-        </div>
+        {isDone ? null : (
+          <>
+            <Batch />
+            <div className="mt-xs text-danger typo-sm">
+              虚线框为照片打印区域，不满意可点击“编辑”调整
+            </div>
+          </>
+        )}
+
         <div className="flex-1 py-md pb-[72px]">
           {order?.images.length === 0 ? (
             <div
@@ -73,37 +83,48 @@ export default () => {
           <div className="flex-1 text-danger p-md">
             总计：{count}/{total}
           </div>
-          <Button
-            icon={<IconSave />}
-            disabled={order?.images.length === 0}
-            theme="solid"
-            className="h-full flex-1 p-md border-l border-border-0 flex items-center justify-center gap-3xs rounded-full"
-            onClick={() => {
-              if (count < total) {
-                Modal.error({
-                  width: "100vw",
-                  closable: false,
-                  content: `照片总数不足 ${total} 张！确认保存吗？`,
-                  onOk: () => {
-                    navigate("/order-detail");
-                    Toast.success("保存成功");
-                  },
-                });
-              } else {
-                Modal.confirm({
-                  width: "100vw",
-                  closable: false,
-                  content: "确认保存设计吗？",
-                  onOk: () => {
-                    navigate("/order-detail");
-                    Toast.success("保存成功");
-                  },
-                });
-              }
-            }}
-          >
-            保存设计
-          </Button>
+          {isDone ? (
+            <Button
+              onClick={() => {
+                navigate("/order-detail");
+              }}
+              className="h-full flex-1 p-md border-l border-border-0 flex items-center justify-center gap-3xs rounded-full"
+            >
+              返回订单
+            </Button>
+          ) : (
+            <Button
+              icon={<IconSave />}
+              disabled={order?.images.length === 0}
+              theme="solid"
+              className="h-full flex-1 p-md border-l border-border-0 flex items-center justify-center gap-3xs rounded-full"
+              onClick={() => {
+                if (count < total) {
+                  Modal.error({
+                    width: "100vw",
+                    closable: false,
+                    content: `照片总数不足 ${total} 张！确认保存吗？`,
+                    onOk: () => {
+                      navigate("/order-detail");
+                      Toast.success("保存成功");
+                    },
+                  });
+                } else {
+                  Modal.confirm({
+                    width: "100vw",
+                    closable: false,
+                    content: "确认保存设计吗？",
+                    onOk: () => {
+                      navigate("/order-detail");
+                      Toast.success("保存成功");
+                    },
+                  });
+                }
+              }}
+            >
+              保存设计
+            </Button>
+          )}
         </div>
       </div>
       {/* {!type ? (

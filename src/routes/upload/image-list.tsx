@@ -1,5 +1,11 @@
 import { updateImageParams } from "@/servers";
-import { imageCacheAtom, orderAtom, paperRatioAtom, totalAtom } from "@/stores";
+import {
+  imageCacheAtom,
+  orderAtom,
+  orderIsDoneAtom,
+  paperRatioAtom,
+  totalAtom,
+} from "@/stores";
 import { http } from "@/utils/http";
 import { IconDelete, IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
@@ -35,6 +41,7 @@ function ImageContainer({
   countRef.current = count;
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
   const setImageCache = useSetAtom(imageCacheAtom);
+  const isDone = useAtomValue(orderIsDoneAtom);
 
   // useUpdateEffect(() => {
   //   if (tempCount !== count) {
@@ -58,96 +65,102 @@ function ImageContainer({
         ready
         frameClassName="border border-border-0 border-dashed"
       />
-      <div className="flex items-center p-3xs rounded-full border border-border-0 shadow-md gap-xs">
-        <div className="flex items-center gap-4xs">
-          {count <= 1 ? (
-            <Tooltip content="删除">
-              <Button
-                icon={<IconDelete />}
-                type="danger"
-                theme="light"
-                size="small"
-                className="rounded-full shadow-md"
-                onClick={() => {
-                  Modal.confirm({
-                    title: "确认删除吗？",
-                    content: "删除后可以从历史图片中恢复",
-                    width: "100vw",
-                    onOk: () => {
-                      if (!order) {
-                        return;
-                      }
-                      http
-                        .delete(
-                          `/images/${order?.order_number || ""}/${image?.id}`,
-                        )
-                        .then(() => {
-                          setOrder({
-                            ...order,
-                            images: (order.images || []).filter(
-                              (_, i) => i !== index,
-                            ),
-                            history_images: [
-                              ...(order.history_images || []),
-                              image?.id || "",
-                            ],
+      {isDone ? (
+        <div className="absolute top-[-8px] right-[-8px] bg-danger typo-sm text-white px-3xs rounded-full">
+          {count}
+        </div>
+      ) : (
+        <div className="flex items-center p-3xs rounded-full border border-border-0 shadow-md gap-xs">
+          <div className="flex items-center gap-4xs">
+            {count <= 1 ? (
+              <Tooltip content="删除">
+                <Button
+                  icon={<IconDelete />}
+                  type="danger"
+                  theme="light"
+                  size="small"
+                  className="rounded-full shadow-md"
+                  onClick={() => {
+                    Modal.confirm({
+                      title: "确认删除吗？",
+                      content: "删除后可以从历史图片中恢复",
+                      width: "100vw",
+                      onOk: () => {
+                        if (!order) {
+                          return;
+                        }
+                        http
+                          .delete(
+                            `/images/${order?.order_number || ""}/${image?.id}`,
+                          )
+                          .then(() => {
+                            setOrder({
+                              ...order,
+                              images: (order.images || []).filter(
+                                (_, i) => i !== index,
+                              ),
+                              history_images: [
+                                ...(order.history_images || []),
+                                image?.id || "",
+                              ],
+                            });
                           });
-                        });
-                      setImageCache((prev: any) =>
-                        prev.filter((item) => item.key !== image?.id),
-                      );
-                    },
-                  });
+                        setImageCache((prev: any) =>
+                          prev.filter((item) => item.key !== image?.id),
+                        );
+                      },
+                    });
+                  }}
+                />
+              </Tooltip>
+            ) : (
+              <Button
+                size="small"
+                icon={<IconMinus />}
+                className="rounded-full"
+                onClick={() => {
+                  const nextCount =
+                    countRef.current === 1 ? 1 : countRef.current - 1;
+                  const success = setCount(nextCount);
+                  if (success) {
+                    setTempCount(nextCount);
+                  }
                 }}
               />
-            </Tooltip>
-          ) : (
+            )}
+            <Input
+              className="w-[24px] [&>input]:px-3xs"
+              value={tempCount}
+              onChange={(v) => {
+                setTempCount(v === "" ? undefined : Math.max(1, Number(v)));
+              }}
+              onBlur={() => {
+                if (tempCount !== undefined) {
+                  const success = setCount(tempCount);
+                  if (!success) {
+                    setTempCount(countRef.current);
+                  }
+                } else {
+                  setTempCount(countRef.current);
+                }
+              }}
+            />
             <Button
               size="small"
-              icon={<IconMinus />}
+              icon={<IconPlus />}
               className="rounded-full"
               onClick={() => {
-                const nextCount =
-                  countRef.current === 1 ? 1 : countRef.current - 1;
+                const nextCount = countRef.current + 1;
                 const success = setCount(nextCount);
                 if (success) {
                   setTempCount(nextCount);
                 }
               }}
             />
-          )}
-          <Input
-            className="w-[24px] [&>input]:px-3xs"
-            value={tempCount}
-            onChange={(v) => {
-              setTempCount(v === "" ? undefined : Math.max(1, Number(v)));
-            }}
-            onBlur={() => {
-              if (tempCount !== undefined) {
-                const success = setCount(tempCount);
-                if (!success) {
-                  setTempCount(countRef.current);
-                }
-              } else {
-                setTempCount(countRef.current);
-              }
-            }}
-          />
-          <Button
-            size="small"
-            icon={<IconPlus />}
-            className="rounded-full"
-            onClick={() => {
-              const nextCount = countRef.current + 1;
-              const success = setCount(nextCount);
-              if (success) {
-                setTempCount(nextCount);
-              }
-            }}
-          />
+          </div>
+          <Editor index={index} />
         </div>
-        <Editor index={index} />
-      </div>
+      )}
     </div>
   );
 }

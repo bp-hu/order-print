@@ -1,3 +1,4 @@
+import { cn } from "@auix/utils";
 import { Table } from "@douyinfe/semi-ui";
 import dayjs from "dayjs";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -44,6 +45,18 @@ export function OrderList() {
           {
             title: "客户状态",
             dataIndex: "customer_status",
+            render(status) {
+              return (
+                <div
+                  className={cn({
+                    "text-success": status === "照片已上传",
+                    "text-danger": status === "照片未上传",
+                  })}
+                >
+                  {status || "-"}
+                </div>
+              );
+            },
           },
           {
             title: "商家状态",

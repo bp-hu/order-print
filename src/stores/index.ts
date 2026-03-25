@@ -89,6 +89,10 @@ export const paperRatioAtom = atom<number>((get) => {
   const photoSize = PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
   return photoSize ? photoSize.w / photoSize.h : 0.4;
 });
+export const orderIsDoneAtom = atom<boolean>((get) => {
+  const order = get(orderAtom);
+  return order?.customer_status === "照片已上传";
+});
 export const totalAtom = atom<number>((get) => {
   const order = get(orderAtom);
   return order?.max_photo_count || 0;

@@ -1,5 +1,12 @@
 import { customerConfirm } from "@/servers";
-import { countAtom, orderAtom, orderIdAtom, showPrintTipAtom } from "@/stores";
+import {
+  countAtom,
+  orderAtom,
+  orderIdAtom,
+  orderIsDoneAtom,
+  refreshOrderAtom,
+  showPrintTipAtom,
+} from "@/stores";
 import { IconFilledArrowUp, IconUpload } from "@douyinfe/semi-icons";
 import {
   Button,
@@ -17,12 +24,13 @@ const { Text } = Typography;
 export default () => {
   const navigate = useNavigate();
   const order = useAtomValue(orderAtom);
+  const refreshOrder = useSetAtom(refreshOrderAtom);
   const setOrderId = useSetAtom(orderIdAtom);
   const [showPrintTip, setShowPrintTip] = useAtom(showPrintTipAtom);
   const maxCount = order?.max_photo_count || 0;
   const count = useAtomValue(countAtom);
   const isDesigned = count > 0;
-  const isDone = order?.customer_status === "照片已上传";
+  const isDone = useAtomValue(orderIsDoneAtom);
 
   return (
     <>
@@ -112,12 +120,23 @@ export default () => {
                   return;
                 }
                 await customerConfirm(order?.order_number || "");
+                refreshOrder();
                 Toast.success("提交成功");
               }}
             >
               提交印刷
             </Button>
           </div>
+        ) : null}
+        {isDone ? (
+          <Button
+            theme="solid"
+            onClick={() => {
+              navigate(`/upload?id=${order?.order_number}`);
+            }}
+          >
+            查看设计
+          </Button>
         ) : null}
         {/* {imageList.length < 10 ? (
         <div className="typo-sm text-danger flex items-center gap-3xs">
