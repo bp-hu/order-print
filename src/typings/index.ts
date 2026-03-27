@@ -45,7 +45,7 @@ export interface IOrder {
   merchant_status: string;
   images: TImage[];
   history_images: string[];
-  express: Record<string, any>;
+  remark: Record<string, any>;
   created_at: string;
   updated_at: string;
 }

@@ -13,7 +13,7 @@ export function CountEditor({
   setVisible: (visible: boolean) => void;
   onOk?: (count: number) => void;
 }) {
-  const [count, setCount] = useState(1);
+  const [count, setCount] = useState<number | undefined>(1);
   const total = useAtomValue(totalAtom);
   const order = useAtomValue(orderAtom);
 
@@ -38,25 +38,31 @@ export function CountEditor({
             size="large"
             icon={<IconMinus />}
             className="rounded-full"
-            disabled={count === 1}
-            onClick={() => setCount(count === 1 ? 1 : count - 1)}
+            disabled={!count}
+            onClick={() => setCount(count === 1 ? 1 : (count || 0) - 1)}
           />
           <Input
             className="flex-1 [&>input]:px-3xs"
             value={count}
-            onChange={(v) => setCount(Math.max(1, Number(v)))}
+            onChange={(v) =>
+              v ? setCount(Math.max(0, Number(v))) : setCount(undefined)
+            }
           />
           <Button
             size="large"
             icon={<IconPlus />}
             className="rounded-full"
-            onClick={() => setCount(count + 1)}
+            onClick={() => setCount((count || 0) + 1)}
           />
         </div>
         <Button
           theme="solid"
           className="w-full"
+          disabled={!count || count <= 0}
           onClick={() => {
+            if (!count) {
+              return;
+            }
             if ((order?.images?.length || 0) * count > total) {
               Modal.error({
                 title: "重要提示",

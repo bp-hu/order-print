@@ -1,5 +1,6 @@
 import { IOrder } from "@/typings";
 import { http } from "@/utils/http";
+import { cn } from "@auix/utils";
 import { IconEdit } from "@douyinfe/semi-icons";
 import { Button, Form, Modal, Toast } from "@douyinfe/semi-ui";
 import { FormApi } from "@douyinfe/semi-ui/lib/es/form";
@@ -49,13 +50,7 @@ export function OrderEdit({ order }: { order: IOrder }) {
           const form = formRef.current;
           await form?.validate();
           const values = form?.getValues();
-          await updateOrder({
-            customer_status: values.customer_status,
-            merchant_status: values.merchant_status,
-            remark: {
-              text: values.remark,
-            },
-          });
+          await updateOrder(values);
         }}
         okButtonProps={{
           loading,
@@ -66,7 +61,9 @@ export function OrderEdit({ order }: { order: IOrder }) {
           initValues={{
             customer_status: order.customer_status,
             merchant_status: order.merchant_status,
-            express: order.express,
+            remark: {
+              text: order.remark.text || undefined,
+            },
           }}
         >
           <Form.Select
@@ -81,11 +78,25 @@ export function OrderEdit({ order }: { order: IOrder }) {
             label="商家状态"
             field="merchant_status"
             optionList={merchantStatus.map((v) => ({
-              label: v,
+              label: (
+                <div
+                  className={cn({
+                    "text-blue-600": v === "商家处理中",
+                    "text-orange-600": v === "商家已发货",
+                    "text-green-600": v === "订单已完成",
+                  })}
+                >
+                  {v}
+                </div>
+              ),
               value: v,
             }))}
           />
-          <Form.TextArea label="备注" field="remark" placeholder="请输入备注" />
+          <Form.TextArea
+            label="备注"
+            field="remark.text"
+            placeholder="请输入备注"
+          />
         </Form>
       </Modal>
     </>

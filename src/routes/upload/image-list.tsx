@@ -7,10 +7,16 @@ import {
   totalAtom,
 } from "@/stores";
 import { http } from "@/utils/http";
-import { IconDelete, IconMinus, IconPlus } from "@douyinfe/semi-icons";
+import { useUpdateEffect } from "@auix/utils";
+import {
+  IconAlertTriangle,
+  IconDelete,
+  IconMinus,
+  IconPlus,
+} from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ClipPreview } from "./clip-preview";
 import Editor from "./editor";
 
@@ -36,35 +42,58 @@ function ImageContainer({
     clipLeftPercent,
     clipWidthPercent,
     clipHeightPercent,
+    paper_h = 0,
+    paper_w = 0,
   } = image?.edited_params ?? {};
   const countRef = useRef(count);
   countRef.current = count;
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
   const setImageCache = useSetAtom(imageCacheAtom);
   const isDone = useAtomValue(orderIsDoneAtom);
+  const showTip = useMemo(() => {
+    if (
+      naturalWidth === 0 ||
+      naturalHeight === 0 ||
+      paper_h === 0 ||
+      paper_w === 0
+    ) {
+      return false;
+    }
+    const minHeight = (paper_h / 25) * 300;
+    const minWidth = (paper_w / 25) * 300;
+    return naturalWidth < minWidth || naturalHeight < minHeight;
+  }, [naturalWidth, naturalHeight]);
 
-  // useUpdateEffect(() => {
-  //   if (tempCount !== count) {
-  //     setTempCount(count);
-  //   }
-  // }, [tempCount, count]);
+  useUpdateEffect(() => {
+    if (tempCount !== count) {
+      setTempCount(count);
+    }
+  }, [tempCount, count]);
 
   return (
     <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-2xs rounded-md border border-border-0 shadow-md">
-      <ClipPreview
-        src={image?.preview_url || url}
-        imageId={image?.id || ""}
-        layout={layout}
-        clipType={clipType}
-        size={[160, 160]}
-        paperRatio={paperRatio}
-        rotate={rotate}
-        imageSize={[naturalWidth, naturalHeight]}
-        clipPosPercent={[clipLeftPercent || 0, clipTopPercent || 0]}
-        clipSizePercent={[clipWidthPercent || 0, clipHeightPercent || 0]}
-        ready
-        frameClassName="border border-border-0 border-dashed"
-      />
+      <div className="relative">
+        <ClipPreview
+          src={image?.preview_url || url}
+          imageId={image?.id || ""}
+          layout={layout}
+          clipType={clipType}
+          size={[160, 160]}
+          paperRatio={paperRatio}
+          rotate={rotate}
+          imageSize={[naturalWidth, naturalHeight]}
+          clipPosPercent={[clipLeftPercent || 0, clipTopPercent || 0]}
+          clipSizePercent={[clipWidthPercent || 0, clipHeightPercent || 0]}
+          ready
+          frameClassName="border border-border-0 border-dashed"
+        />
+        {showTip ? (
+          <div className="absolute bottom-0 bg-black/30 justify-center w-full p-4xs flex items-center text-white typo-sm">
+            <IconAlertTriangle className="text-danger" />
+            清晰度低，可能模糊
+          </div>
+        ) : null}
+      </div>
       {isDone ? (
         <div className="absolute top-[-8px] right-[-8px] bg-danger typo-sm text-white px-3xs rounded-full">
           {count}
