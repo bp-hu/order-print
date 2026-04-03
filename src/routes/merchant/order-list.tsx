@@ -1,8 +1,8 @@
-import { cn } from "@auix/utils";
+import { CUSTOMER_STATUS_COLOR, MERCHANT_STATUS_COLOR } from "@/consts";
 import { Table } from "@douyinfe/semi-ui";
 import dayjs from "dayjs";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Download } from "./download";
 import { OrderEdit } from "./order-edit";
 import { OrderRemove } from "./order-remove";
@@ -12,6 +12,10 @@ import { orderListAtom, refreshOrderlistAtom } from "./store";
 export function OrderList() {
   const orderList = useAtomValue(orderListAtom);
   const refresh = useSetAtom(refreshOrderlistAtom);
+  const [pagination, setPagination] = useState({
+    pageSize: 10,
+    currentPage: 1,
+  });
 
   useEffect(() => {
     refresh();
@@ -20,7 +24,10 @@ export function OrderList() {
   return (
     <div>
       <Table
-        dataSource={orderList}
+        dataSource={orderList.slice(
+          (pagination.currentPage - 1) * pagination.pageSize,
+          pagination.currentPage * pagination.pageSize,
+        )}
         columns={[
           {
             title: "订单 ID",
@@ -47,12 +54,7 @@ export function OrderList() {
             dataIndex: "customer_status",
             render(status) {
               return (
-                <div
-                  className={cn({
-                    "text-success": status === "照片已上传",
-                    "text-danger": status === "照片未上传",
-                  })}
-                >
+                <div className={CUSTOMER_STATUS_COLOR[status]}>
                   {status || "-"}
                 </div>
               );
@@ -61,6 +63,11 @@ export function OrderList() {
           {
             title: "商家状态",
             dataIndex: "merchant_status",
+            render(status) {
+              return (
+                <div className={MERCHANT_STATUS_COLOR[status]}>{status}</div>
+              );
+            },
           },
           {
             title: "创建时间",
@@ -92,7 +99,7 @@ export function OrderList() {
 
               return (
                 <div className="flex flex-col gap-xs items-center">
-                  {isDone ? <Download orderNumber={orderNumber} /> : null}
+                  {isDone ? <Download order={order} /> : null}
                   <OrderEdit order={order} />
                   <OrderRemove orderNumber={orderNumber} />
                   <PreviewImages
@@ -105,6 +112,17 @@ export function OrderList() {
             },
           },
         ]}
+        pagination={{
+          total: orderList?.length || 0,
+          ...pagination,
+          onChange(currentPage, pageSize) {
+            setPagination({
+              ...pagination,
+              currentPage,
+              pageSize,
+            });
+          },
+        }}
       />
     </div>
   );

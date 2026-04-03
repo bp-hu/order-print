@@ -28,7 +28,6 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
   const totalRef = useRef<number>(0);
   const [currentIndex, setCurrentIndex] = useState<number>(1);
   const currentIndexRef = useRef<number>(currentIndex);
-  currentIndexRef.current = currentIndex;
 
   const { run: upload } = useRequest(
     ({ query, body, onUploadProgress, onSuccess, onError }) =>
@@ -60,10 +59,12 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
         action="https://api.semi.design/upload"
         showUploadList={false}
         multiple
-        limit={total - count}
         disabled={count >= total}
         beforeUpload={({ fileList }) => {
-          if (count + fileList.length > total) {
+          const newFileList = fileList.filter(
+            (v) => v.status === "uploading" && v.shouldUpload !== false,
+          );
+          if (count + newFileList.length > total) {
             single(
               "upload-error",
               () =>
@@ -83,9 +84,8 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
 
           setUploading(true);
           setCurrentIndex(1);
-          totalRef.current = fileList.filter(
-            (v) => v.status === "uploading" && v.shouldUpload !== false,
-          ).length;
+          currentIndexRef.current = 1;
+          totalRef.current = newFileList.length;
 
           return {
             shouldUpload: true,
@@ -135,6 +135,7 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
 
               const nextIndex = currentIndexRef.current + 1;
               setCurrentIndex(nextIndex);
+              currentIndexRef.current = nextIndex;
               if (nextIndex >= totalRef.current) {
                 setUploading(false);
                 refreshOrder();
@@ -150,6 +151,7 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
               onError(err);
               const nextIndex = currentIndexRef.current + 1;
               setCurrentIndex(nextIndex);
+              currentIndexRef.current = nextIndex;
               if (nextIndex >= totalRef.current) {
                 setUploading(false);
                 refreshOrder();

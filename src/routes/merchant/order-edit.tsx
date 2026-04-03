@@ -1,6 +1,6 @@
+import { CUSTOMER_STATUS_COLOR, MERCHANT_STATUS_COLOR } from "@/consts";
 import { IOrder } from "@/typings";
 import { http } from "@/utils/http";
-import { cn } from "@auix/utils";
 import { IconEdit } from "@douyinfe/semi-icons";
 import { Button, Form, Modal, Toast } from "@douyinfe/semi-ui";
 import { FormApi } from "@douyinfe/semi-ui/lib/es/form";
@@ -70,7 +70,7 @@ export function OrderEdit({ order }: { order: IOrder }) {
             label="客户状态"
             field="customer_status"
             optionList={customerStatus.map((v) => ({
-              label: v,
+              label: <div className={CUSTOMER_STATUS_COLOR[v]}>{v}</div>,
               value: v,
             }))}
           />
@@ -78,17 +78,7 @@ export function OrderEdit({ order }: { order: IOrder }) {
             label="商家状态"
             field="merchant_status"
             optionList={merchantStatus.map((v) => ({
-              label: (
-                <div
-                  className={cn({
-                    "text-blue-600": v === "商家处理中",
-                    "text-orange-600": v === "商家已发货",
-                    "text-green-600": v === "订单已完成",
-                  })}
-                >
-                  {v}
-                </div>
-              ),
+              label: <div className={MERCHANT_STATUS_COLOR[v]}>{v}</div>,
               value: v,
             }))}
           />

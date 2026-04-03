@@ -5,7 +5,6 @@ import { Outlet, useNavigate } from "@edenx/runtime/router";
 import { useAtom, useSetAtom } from "jotai";
 import localforage from "localforage";
 import { useEffect, type JSX } from "react";
-import CannonBannerSVG from "./canon-banner.svg";
 import "./index.css";
 
 const Layout = (): JSX.Element => {
@@ -33,11 +32,11 @@ const Layout = (): JSX.Element => {
   return (
     <div>
       <div className="p-md">
-        <img
+        {/* <img
           className="w-full max-h-[80px]"
           src={CannonBannerSVG}
           alt="cannon-banner"
-        />
+        /> */}
       </div>
       <div className="flex items-center justify-center">
         <div

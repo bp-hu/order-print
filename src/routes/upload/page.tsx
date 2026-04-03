@@ -55,6 +55,7 @@ export default () => {
           <>
             <Batch />
             <div className="mt-xs text-danger typo-sm">
+              上传照片时，按住 Shift 或 Command 选择多张照片。
               虚线框为照片打印区域，不满意可点击“编辑”调整
             </div>
           </>

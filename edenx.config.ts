@@ -13,7 +13,7 @@ export default defineConfig({
     hmr: process.env.NODE_ENV !== "production",
     port: PORT,
     client: { protocol: "ws", host: "localhost", port: `${PORT}` },
-    startUrl: "http://47.102.196.29/",
+    startUrl: "https://canonprint.cn/",
   },
   plugins: [
     appTools({

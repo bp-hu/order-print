@@ -95,7 +95,7 @@ export function getPrintParams({
   clipSizePercent: [number, number];
 }) {
   const [paperWidth, paperHeight] = paperSize;
-  const paperRatio = paperSize[0] / paperSize[1];
+  const paperRatioProp = paperSize[0] / paperSize[1];
   const imageRatio = imageSize[0] / imageSize[1];
   const isAuto = clipType === "auto";
   const {
@@ -105,7 +105,7 @@ export function getPrintParams({
     imageHeight: zoomImageHeight,
   } = getClipSize({
     ...props,
-    paperRatio,
+    paperRatio: paperRatioProp,
     isAuto,
     containerSize: [400, 400],
     imageSize,
@@ -184,6 +184,12 @@ export function getPrintParams({
 
   /** 智能裁剪 */
   // 高度裁剪
+  const isHorizontal = props.layout === "horizontal";
+  const isVertical = !isHorizontal;
+  const paperRatio =
+    (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1)
+      ? 1 / paperRatioProp
+      : paperRatioProp;
   if (imageRatio <= paperRatio) {
     const clipTop = clipPosPercent[0] * paperHeight;
     const clipHeight = clipSizePercent[1] * paperHeight;

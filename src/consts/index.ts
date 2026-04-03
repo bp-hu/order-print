@@ -93,3 +93,15 @@ export const PHOTO_SIZES = {
     h: 380,
   },
 };
+
+export const MERCHANT_STATUS_COLOR = {
+  等待客户处理: "text-red-600",
+  商家处理中: "text-blue-600",
+  商家已发货: "text-orange-600",
+  订单已完成: "text-green-600",
+};
+
+export const CUSTOMER_STATUS_COLOR = {
+  照片未上传: "text-red-600",
+  照片已上传: "text-green-600",
+};
