@@ -59,8 +59,8 @@ function ImageContainer({
     ) {
       return false;
     }
-    const minHeight = (paper_h / 25) * 300;
-    const minWidth = (paper_w / 25) * 300;
+    const minHeight = (paper_h / 25) * 200;
+    const minWidth = (paper_w / 25) * 200;
     return naturalWidth < minWidth || naturalHeight < minHeight;
   }, [naturalWidth, naturalHeight]);
 

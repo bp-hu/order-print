@@ -1,4 +1,5 @@
 import { ClipLayout } from "@/typings";
+import { getClipParams, getFrameSizeFromContainer } from "@/utils";
 import { cn, useDebounceFn, useUpdateEffect } from "@auix/utils";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
@@ -6,24 +7,22 @@ import Draggable from "react-draggable";
 export function Clip({
   className,
   style,
-  frameHeight,
-  frameWidth,
   defaultClipPosPercent,
   onMove,
   layout,
   paperRatio,
-  imageRatio,
+  imageSize,
   disabled,
+  containerSize,
 }: {
   className?: string;
   style?: CSSProperties;
-  frameHeight: number;
-  frameWidth: number;
   layout: ClipLayout;
   paperRatio: number;
-  imageRatio: number;
+  imageSize: [number, number];
   disabled?: boolean;
   defaultClipPosPercent?: [number, number];
+  containerSize: [number, number];
   onMove: (props: {
     clipTopPercent: number;
     clipLeftPercent: number;
@@ -32,39 +31,34 @@ export function Clip({
   }) => void;
 }) {
   const nodeRef = useRef<HTMLDivElement>(null);
+  const imageRatio = imageSize[0] / imageSize[1];
+  const [frameWidth, frameHeight] = getFrameSizeFromContainer({
+    layout,
+    containerSize,
+    paperRatio,
+    isAuto: true,
+    imageSize,
+  });
   const [position, setPosition] = useState({
     x: (defaultClipPosPercent?.[0] || 0) * frameWidth,
     y: (defaultClipPosPercent?.[1] || 0) * frameHeight,
   });
 
   const { x: clipLeft, y: clipTop } = position;
-  // 相对于 paper，照片是纵向的还是横向的
-  const clipRatio =
-    (layout === "vertical" && paperRatio > 1) ||
-    (layout === "horizontal" && paperRatio <= 1)
-      ? 1 / paperRatio
-      : paperRatio;
-  let croppingWidth = 0;
-  let croppingHeight = 0;
-  const isVertical = imageRatio <= clipRatio;
 
-  // 纵向裁剪
-  if (isVertical) {
-    croppingWidth = frameWidth;
-    croppingHeight =
-      (layout === "vertical" && clipRatio < 1) ||
-      (layout === "horizontal" && clipRatio >= 1)
-        ? croppingWidth / clipRatio
-        : croppingWidth * clipRatio;
-  } else {
-    // 横向裁剪
-    croppingHeight = frameHeight;
-    croppingWidth =
-      (layout === "vertical" && clipRatio < 1) ||
-      (layout === "horizontal" && clipRatio >= 1)
-        ? croppingHeight * clipRatio
-        : croppingHeight / clipRatio;
-  }
+  const {
+    croppingWidth,
+    croppingHeight,
+    clipRatio,
+    clipHeightPercent,
+    clipWidthPercent,
+  } = getClipParams({
+    layout,
+    paperRatio,
+    containerSize,
+    imageSize,
+  });
+  const isVertical = imageRatio <= clipRatio;
 
   const { run: debounceOnMove } = useDebounceFn(onMove, 300);
 
@@ -75,10 +69,10 @@ export function Clip({
     debounceOnMove?.({
       clipTopPercent: clipTop / frameHeight,
       clipLeftPercent: clipLeft / frameWidth,
-      clipHeightPercent: croppingHeight / frameHeight,
-      clipWidthPercent: croppingWidth / frameWidth,
+      clipHeightPercent,
+      clipWidthPercent,
     });
-  }, [position, frameHeight]);
+  }, [position, clipHeightPercent, clipWidthPercent]);
 
   // 切换布局时，重置位置
   useUpdateEffect(() => {

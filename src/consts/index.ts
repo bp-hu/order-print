@@ -105,3 +105,5 @@ export const CUSTOMER_STATUS_COLOR = {
   照片未上传: "text-red-600",
   照片已上传: "text-green-600",
 };
+
+export const DEFAULT_CONTAINER_SIZE = [400, 400] as [number, number];

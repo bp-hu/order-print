@@ -1,3 +1,4 @@
+import { DEFAULT_CONTAINER_SIZE } from "@/consts";
 import { ClipType } from "@/typings";
 
 interface ClipProps {
@@ -6,6 +7,120 @@ interface ClipProps {
   imageSize: [number, number];
   paperRatio: number;
   isAuto?: boolean;
+}
+
+export function getPaperRatioByLayout({
+  layout,
+  paperRatio: paperRatioProp,
+}: {
+  layout: "horizontal" | "vertical";
+  paperRatio: number;
+}) {
+  const isHorizontal = layout === "horizontal";
+  const isVertical = !isHorizontal;
+
+  return (isHorizontal && paperRatioProp < 1) ||
+    (isVertical && paperRatioProp >= 1)
+    ? 1 / paperRatioProp
+    : paperRatioProp;
+}
+
+export function getFrameSizeFromContainer({
+  layout,
+  containerSize,
+  paperRatio: paperRatioProp,
+  isAuto = false,
+  imageSize,
+}: {
+  layout: "horizontal" | "vertical";
+  containerSize: [number, number];
+  imageSize: [number, number];
+  paperRatio: number;
+  isAuto?: boolean;
+}) {
+  const [width, height] = imageSize;
+  const [containerWidth, containerHeight] = containerSize;
+  const isHorizontal = layout === "horizontal";
+  const paperRatio = getPaperRatioByLayout({
+    layout,
+    paperRatio: paperRatioProp,
+  });
+
+  let frameWidth = 0;
+  let frameHeight = 0;
+
+  if (isHorizontal) {
+    frameWidth = containerWidth;
+    frameHeight =
+      paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
+  } else {
+    frameHeight = containerHeight;
+    frameWidth =
+      paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
+  }
+
+  if (isAuto) {
+    frameWidth =
+      width > height ? containerWidth : (containerHeight / height) * width;
+    frameHeight =
+      width > height ? (containerWidth / width) * height : containerHeight;
+  }
+
+  return [frameWidth, frameHeight];
+}
+
+export function getClipParams({
+  layout,
+  paperRatio,
+  imageSize,
+  containerSize,
+}: {
+  layout: "horizontal" | "vertical";
+  paperRatio: number;
+  containerSize: [number, number];
+  imageSize: [number, number];
+}) {
+  const imageRatio = imageSize[0] / imageSize[1];
+  const [frameWidth, frameHeight] = getFrameSizeFromContainer({
+    layout,
+    containerSize,
+    paperRatio,
+    isAuto: true,
+    imageSize,
+  });
+  const clipRatio = getPaperRatioByLayout({
+    layout,
+    paperRatio,
+  });
+  let croppingWidth = 0;
+  let croppingHeight = 0;
+  const isVertical = imageRatio <= clipRatio;
+
+  // 纵向裁剪
+  if (isVertical) {
+    croppingWidth = frameWidth;
+    croppingHeight =
+      (layout === "vertical" && clipRatio < 1) ||
+      (layout === "horizontal" && clipRatio >= 1)
+        ? croppingWidth / clipRatio
+        : croppingWidth * clipRatio;
+  } else {
+    // 横向裁剪
+    croppingHeight = frameHeight;
+    croppingWidth =
+      (layout === "vertical" && clipRatio < 1) ||
+      (layout === "horizontal" && clipRatio >= 1)
+        ? croppingHeight * clipRatio
+        : croppingHeight / clipRatio;
+  }
+
+  return {
+    croppingWidth,
+    croppingHeight,
+    clipRatio,
+    clipHeightPercent: croppingHeight / frameHeight,
+    clipWidthPercent: croppingWidth / frameWidth,
+  };
 }
 
 export function getClipSize({
@@ -23,6 +138,23 @@ export function getClipSize({
   const [containerWidth, containerHeight] = containerSize;
   const [width, height] = imageSize;
   const imageRatio = width / height;
+  const [frameWidth, frameHeight] = getFrameSizeFromContainer({
+    layout,
+    containerSize,
+    paperRatio: paperRatioProp,
+    isAuto,
+    imageSize,
+  });
+
+  let imageWidth = 0;
+  let imageHeight = 0;
+
+  if (isAuto) {
+    imageWidth =
+      width > height ? containerWidth : (containerHeight / height) * width;
+    imageHeight =
+      width > height ? (containerWidth / width) * height : containerHeight;
+  }
 
   const isHorizontal = layout === "horizontal";
   const isVertical = !isHorizontal;
@@ -30,40 +162,6 @@ export function getClipSize({
     (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1)
       ? 1 / paperRatioProp
       : paperRatioProp;
-
-  let frameWidth = 0;
-  let frameHeight = 0;
-  let imageWidth = 0;
-  let imageHeight = 0;
-
-  if (isHorizontal) {
-    frameWidth = containerWidth;
-    frameHeight =
-      paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
-  } else {
-    frameHeight = containerHeight;
-    frameWidth =
-      paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
-  }
-
-  if (isAuto) {
-    const frameWidth =
-      width > height ? containerWidth : (containerHeight / height) * width;
-    const frameHeight =
-      width > height ? (containerWidth / width) * height : containerHeight;
-
-    const imageWidth =
-      width > height ? containerWidth : (containerHeight / height) * width;
-    const imageHeight =
-      width > height ? (containerWidth / width) * height : containerHeight;
-
-    return {
-      frameWidth,
-      frameHeight,
-      imageWidth,
-      imageHeight,
-    };
-  }
 
   if (paperRatio <= imageRatio) {
     imageWidth = frameWidth;
@@ -107,7 +205,7 @@ export function getPrintParams({
     ...props,
     paperRatio: paperRatioProp,
     isAuto,
-    containerSize: [400, 400],
+    containerSize: DEFAULT_CONTAINER_SIZE,
     imageSize,
   });
 

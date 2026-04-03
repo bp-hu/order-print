@@ -130,20 +130,19 @@ function Editor({
           ]}
         >
           {editParams.clipType === "auto"
-            ? ({ frameHeight, frameWidth, paperRatio, layout }) => (
+            ? ({ containerSize, paperRatio, layout }) => (
                 <Clip
-                  frameHeight={frameHeight}
-                  frameWidth={frameWidth}
+                  containerSize={containerSize}
                   layout={layout}
                   paperRatio={paperRatio}
                   defaultClipPosPercent={[
                     editParams.clipLeftPercent || 0,
                     editParams.clipTopPercent || 0,
                   ]}
-                  imageRatio={
-                    (editParams.naturalWidth || 0) /
-                    (editParams.naturalHeight || 0)
-                  }
+                  imageSize={[
+                    editParams.naturalWidth || 0,
+                    editParams.naturalHeight || 0,
+                  ]}
                   onMove={(pos) =>
                     setEditParams({
                       ...editParams,
@@ -204,20 +203,24 @@ function Editor({
                 onClick: () =>
                   setEditParams({ ...editParams, clipType: "auto" }),
               },
-              {
-                icon: <IconImage />,
-                label: "两边留白",
-                active: editParams.clipType === "margin",
-                onClick: () =>
-                  setEditParams({ ...editParams, clipType: "margin" }),
-              },
-              {
-                icon: <IconImage />,
-                label: "单边留白",
-                active: editParams.clipType === "single",
-                onClick: () =>
-                  setEditParams({ ...editParams, clipType: "single" }),
-              },
+              ...(["1英寸", "2英寸"].includes(order?.photo_size || "")
+                ? []
+                : [
+                    {
+                      icon: <IconImage />,
+                      label: "两边留白",
+                      active: editParams.clipType === "margin",
+                      onClick: () =>
+                        setEditParams({ ...editParams, clipType: "margin" }),
+                    },
+                    {
+                      icon: <IconImage />,
+                      label: "单边留白",
+                      active: editParams.clipType === "single",
+                      onClick: () =>
+                        setEditParams({ ...editParams, clipType: "single" }),
+                    },
+                  ]),
             ].map((v) => (
               <div
                 className={cn(

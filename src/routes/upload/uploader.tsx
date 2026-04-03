@@ -1,4 +1,4 @@
-import { PHOTO_SIZES } from "@/consts";
+import { DEFAULT_CONTAINER_SIZE, PHOTO_SIZES } from "@/consts";
 import {
   countAtom,
   imageCacheAtom,
@@ -7,7 +7,7 @@ import {
   refreshOrderAtom,
   totalAtom,
 } from "@/stores";
-import { fileToDataURL, getPrintParams, single } from "@/utils";
+import { fileToDataURL, getClipParams, getPrintParams, single } from "@/utils";
 import { getImageSize } from "@/utils/get-image-size";
 import { http } from "@/utils/http";
 import { IconUpload } from "@douyinfe/semi-icons";
@@ -99,9 +99,19 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
         }) => {
           const formData = new FormData();
           formData.append("file", fileInstance);
-          const imageSize = await getImageSize(fileInstance);
+          const { naturalWidth, naturalHeight } =
+            await getImageSize(fileInstance);
+          const imageSize = [naturalWidth, naturalHeight] as [number, number];
           const photoSize =
             PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
+          const layout = "horizontal";
+          const { clipHeightPercent, clipWidthPercent } = getClipParams({
+            layout,
+            paperRatio: photoSize?.w / photoSize?.h,
+            containerSize: DEFAULT_CONTAINER_SIZE,
+            imageSize,
+          });
+
           upload({
             query: {
               order_id: orderId,
@@ -109,17 +119,21 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                 count: 1,
                 paper_w: photoSize?.w,
                 paper_h: photoSize?.h,
-                naturalWidth: imageSize.naturalWidth,
-                naturalHeight: imageSize.naturalHeight,
-                clipType: "margin",
-                layout: "horizontal",
+                naturalWidth,
+                naturalHeight,
+                clipType: "auto",
+                layout,
+                clipHeightPercent,
+                clipWidthPercent,
+                clipTopPercent: 0,
+                clipLeftPercent: 0,
                 ...getPrintParams({
                   paperSize: [photoSize?.w || 0, photoSize?.h || 0],
-                  clipType: "margin",
-                  layout: "horizontal",
-                  imageSize: [imageSize.naturalWidth, imageSize.naturalHeight],
+                  clipType: "auto",
+                  layout,
+                  imageSize,
                   clipPosPercent: [0, 0],
-                  clipSizePercent: [1, 1],
+                  clipSizePercent: [clipWidthPercent, clipHeightPercent],
                 }),
               }),
             },

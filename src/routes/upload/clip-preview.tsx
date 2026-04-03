@@ -1,3 +1,4 @@
+import { DEFAULT_CONTAINER_SIZE } from "@/consts";
 import { imageCacheAtom } from "@/stores";
 import type { ClipLayout, ClipType } from "@/typings";
 import { getClipSize } from "@/utils";
@@ -13,7 +14,7 @@ export const ClipPreview = ({
   layout = "horizontal",
   src,
   imageId,
-  size = [400, 400],
+  size = DEFAULT_CONTAINER_SIZE,
   ready = false,
   className,
   frameClassName,
@@ -44,6 +45,7 @@ export const ClipPreview = ({
         imageWidth: number;
         imageHeight: number;
         paperRatio: number;
+        containerSize: [number, number];
         layout: ClipLayout;
       }) => ReactNode);
 }) => {
@@ -161,6 +163,7 @@ export const ClipPreview = ({
               ...clipSize,
               paperRatio,
               layout,
+              containerSize: size,
             })
           : children) ??
           (clipType === "auto" ? (
