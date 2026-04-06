@@ -341,6 +341,16 @@ export function single<T>(id: string, resolver: () => Promise<T>): Promise<T> {
   return Promise.reject();
 }
 
+export function download(url: string) {
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 // 加密
 export function encryptBase64(str: string) {
   return btoa(encodeURIComponent(str));

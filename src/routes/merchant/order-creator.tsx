@@ -4,9 +4,9 @@ import { IconPlus } from "@douyinfe/semi-icons";
 import { Button, Form, Modal, Toast } from "@douyinfe/semi-ui";
 import { FormApi } from "@douyinfe/semi-ui/lib/es/form";
 import { useRequest } from "@safe-fe/hooks";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
-import { refreshOrderlistAtom } from "./store";
+import { orderTypeListAtom, refreshOrderlistAtom } from "./store";
 
 export function OrderCreator() {
   const { run: createOrder, loading } = useRequest((params) =>
@@ -23,6 +23,7 @@ export function OrderCreator() {
   const refresh = useSetAtom(refreshOrderlistAtom);
   const [visible, setVisible] = useState(false);
   const formRef = useRef<FormApi>(undefined);
+  const orderTypeList = useAtomValue(orderTypeListAtom);
 
   return (
     <>
@@ -41,10 +42,7 @@ export function OrderCreator() {
           const form = formRef.current;
           await form?.validate();
           const values = form?.getValues();
-          await createOrder({
-            ...values,
-            order_type: 1,
-          });
+          await createOrder(values);
         }}
         okButtonProps={{
           loading,
@@ -63,12 +61,16 @@ export function OrderCreator() {
             field="order_name"
             placeholder="请输入订单名称"
           />
-          {/* <Form.Input
+          <Form.Select
             rules={[{ required: true, message: "请输入订单类型" }]}
             label="订单类型"
             field="order_type"
             placeholder="请输入订单类型"
-          /> */}
+            optionList={orderTypeList.map((v) => ({
+              label: v,
+              value: v,
+            }))}
+          />
           <Form.Select
             rules={[{ required: true, message: "请输入照片尺寸" }]}
             label="照片尺寸"

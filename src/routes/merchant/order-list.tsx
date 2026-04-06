@@ -1,21 +1,54 @@
 import { CUSTOMER_STATUS_COLOR, MERCHANT_STATUS_COLOR } from "@/consts";
 import { Table } from "@douyinfe/semi-ui";
 import dayjs from "dayjs";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useMemo, useState } from "react";
 import { Download } from "./download";
+import { FilterValue } from "./filter";
 import { OrderEdit } from "./order-edit";
 import { OrderRemove } from "./order-remove";
 import { PreviewImages } from "./preview-images";
-import { orderListAtom, refreshOrderlistAtom } from "./store";
+import {
+  batchModeAtom,
+  orderListAtom,
+  refreshOrderlistAtom,
+  selectedKeysAtom,
+} from "./store";
 
-export function OrderList() {
+export function OrderList({ filterValue }: { filterValue: FilterValue }) {
   const orderList = useAtomValue(orderListAtom);
+  const batchMode = useAtomValue(batchModeAtom);
   const refresh = useSetAtom(refreshOrderlistAtom);
+  const [selectedKeys, setSelectedKeys] = useAtom(selectedKeysAtom);
   const [pagination, setPagination] = useState({
     pageSize: 10,
     currentPage: 1,
   });
+  const filteredData = useMemo(
+    () =>
+      orderList.filter((v) => {
+        let flag = true;
+        if (filterValue.searchKey) {
+          flag = flag && v.order_number === filterValue.searchKey;
+        }
+        if (filterValue.customerStatus) {
+          flag = flag && v.customer_status === filterValue.customerStatus;
+        }
+        if (filterValue.merchantStatus) {
+          flag = flag && v.merchant_status === filterValue.merchantStatus;
+        }
+        return flag;
+      }),
+    [orderList, filterValue],
+  );
+  const dataSource = useMemo(
+    () =>
+      filteredData.slice(
+        (pagination.currentPage - 1) * pagination.pageSize,
+        pagination.currentPage * pagination.pageSize,
+      ),
+    [filteredData, pagination],
+  );
 
   useEffect(() => {
     refresh();
@@ -24,23 +57,34 @@ export function OrderList() {
   return (
     <div>
       <Table
-        dataSource={orderList.slice(
-          (pagination.currentPage - 1) * pagination.pageSize,
-          pagination.currentPage * pagination.pageSize,
-        )}
+        dataSource={dataSource}
+        rowKey="order_number"
+        rowSelection={
+          batchMode
+            ? {
+                selectedRowKeys: selectedKeys,
+                onChange(keys: any) {
+                  setSelectedKeys(keys);
+                },
+              }
+            : undefined
+        }
         columns={[
           {
             title: "订单 ID",
-            dataIndex: "order_number",
+            dataIndex: "id",
+            render(_, record) {
+              return record.order_number;
+            },
           },
           {
             title: "订单名称",
             dataIndex: "order_name",
           },
-          // {
-          //   title: "订单类型",
-          //   dataIndex: "order_type",
-          // },
+          {
+            title: "订单类型",
+            dataIndex: "order_type",
+          },
           {
             title: "照片尺寸",
             dataIndex: "photo_size",
@@ -84,6 +128,14 @@ export function OrderList() {
             },
           },
           {
+            title: "快递单号",
+            dataIndex: "express",
+            width: 120,
+            render(express) {
+              return express?.order_number || "-";
+            },
+          },
+          {
             title: "备注",
             dataIndex: "remark",
             width: 120,
@@ -113,7 +165,7 @@ export function OrderList() {
           },
         ]}
         pagination={{
-          total: orderList?.length || 0,
+          total: filteredData?.length || 0,
           ...pagination,
           onChange(currentPage, pageSize) {
             setPagination({

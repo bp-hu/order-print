@@ -46,6 +46,7 @@ export interface IOrder {
   images: TImage[];
   history_images: string[];
   remark: Record<string, any>;
+  express: Record<string, any>;
   created_at: string;
   updated_at: string;
 }

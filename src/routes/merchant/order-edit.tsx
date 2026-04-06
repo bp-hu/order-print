@@ -10,6 +10,7 @@ import { useRef, useState } from "react";
 import {
   customerStatusAtom,
   merchantStatusAtom,
+  orderTypeListAtom,
   refreshOrderlistAtom,
 } from "./store";
 
@@ -30,6 +31,7 @@ export function OrderEdit({ order }: { order: IOrder }) {
   const formRef = useRef<FormApi>(undefined);
   const customerStatus = useAtomValue(customerStatusAtom);
   const merchantStatus = useAtomValue(merchantStatusAtom);
+  const orderTypeList = useAtomValue(orderTypeListAtom);
 
   return (
     <>
@@ -61,8 +63,12 @@ export function OrderEdit({ order }: { order: IOrder }) {
           initValues={{
             customer_status: order.customer_status,
             merchant_status: order.merchant_status,
+            order_type: order.order_type,
             remark: {
               text: order.remark.text || undefined,
+            },
+            express: {
+              order_number: order.express.order_number || undefined,
             },
           }}
         >
@@ -81,6 +87,19 @@ export function OrderEdit({ order }: { order: IOrder }) {
               label: <div className={MERCHANT_STATUS_COLOR[v]}>{v}</div>,
               value: v,
             }))}
+          />
+          <Form.Select
+            label="订单类型"
+            field="order_type"
+            optionList={orderTypeList.map((v) => ({
+              label: v,
+              value: v,
+            }))}
+          />
+          <Form.Input
+            label="快递单号"
+            field="express.order_number"
+            placeholder="请输入快递单号"
           />
           <Form.TextArea
             label="备注"
