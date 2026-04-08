@@ -29,7 +29,10 @@ export function OrderList({ filterValue }: { filterValue: FilterValue }) {
       orderList.filter((v) => {
         let flag = true;
         if (filterValue.searchKey) {
-          flag = flag && v.order_number === filterValue.searchKey;
+          flag =
+            flag &&
+            (v.order_number.includes(filterValue.searchKey) ||
+              v.order_name.includes(filterValue.searchKey));
         }
         if (filterValue.customerStatus) {
           flag = flag && v.customer_status === filterValue.customerStatus;

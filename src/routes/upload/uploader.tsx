@@ -104,7 +104,8 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
           const imageSize = [naturalWidth, naturalHeight] as [number, number];
           const photoSize =
             PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
-          const layout = "horizontal";
+          const layout =
+            naturalWidth >= naturalHeight ? "horizontal" : "vertical";
           const { clipHeightPercent, clipWidthPercent } = getClipParams({
             layout,
             paperRatio: photoSize?.w / photoSize?.h,
