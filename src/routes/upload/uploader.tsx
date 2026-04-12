@@ -11,11 +11,14 @@ import { fileToDataURL, getClipParams, getPrintParams, single } from "@/utils";
 import { getImageSize } from "@/utils/get-image-size";
 import { http } from "@/utils/http";
 import { IconUpload } from "@douyinfe/semi-icons";
-import { Button, Modal, Spin, Upload } from "@douyinfe/semi-ui";
+import { Button, Modal, Progress, Spin, Upload } from "@douyinfe/semi-ui";
 import { useRequest } from "@safe-fe/hooks";
 import { useAtomValue, useSetAtom } from "jotai";
+import PQueue from "p-queue";
 import { stringify } from "qs";
 import { forwardRef, useRef, useState } from "react";
+
+const uploadQueue = new PQueue({ concurrency: 1 });
 
 export const Uploader = forwardRef<Upload, any>((props, ref) => {
   const total = useAtomValue(totalAtom);
@@ -26,8 +29,9 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
   const orderId = useAtomValue(orderIdAtom);
   const [uploading, setUploading] = useState<boolean>(false);
   const totalRef = useRef<number>(0);
-  const [currentIndex, setCurrentIndex] = useState<number>(1);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const currentIndexRef = useRef<number>(currentIndex);
+  const [percent, setPercent] = useState(0);
 
   const { run: upload } = useRequest(
     ({ query, body, onUploadProgress, onSuccess, onError }) =>
@@ -48,8 +52,9 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
         <div className="fixed left-0 top-0 w-full h-full bg-black/50 flex items-center justify-center z-999">
           <div className="flex flex-col text-white flex flex-col items-center gap-xs">
             <Spin wrapperClassName="[&>.semi-spin-wrapper]:text-white" />
-            <div>
-              照片上传中，请稍候（{currentIndex} / {totalRef.current}）
+            <div className="flex flex-col items-center gap-xs">
+              照片上传中，请稍候（{currentIndex + 1} / {totalRef.current}）
+              <Progress className="w-full" stroke="white" percent={percent} />
             </div>
           </div>
         </div>
@@ -83,8 +88,8 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
           }
 
           setUploading(true);
-          setCurrentIndex(1);
-          currentIndexRef.current = 1;
+          setCurrentIndex(0);
+          currentIndexRef.current = 0;
           totalRef.current = newFileList.length;
 
           return {
@@ -113,74 +118,72 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
             imageSize,
           });
 
-          upload({
-            query: {
-              order_id: orderId,
-              edit_params: JSON.stringify({
-                count: 1,
-                paper_w: photoSize?.w,
-                paper_h: photoSize?.h,
-                naturalWidth,
-                naturalHeight,
-                clipType: "auto",
-                layout,
-                clipHeightPercent,
-                clipWidthPercent,
-                clipTopPercent: 0,
-                clipLeftPercent: 0,
-                ...getPrintParams({
-                  paperSize: [photoSize?.w || 0, photoSize?.h || 0],
+          await uploadQueue.add(() =>
+            upload({
+              query: {
+                order_id: orderId,
+                edit_params: JSON.stringify({
+                  count: 1,
+                  paper_w: photoSize?.w,
+                  paper_h: photoSize?.h,
+                  naturalWidth,
+                  naturalHeight,
                   clipType: "auto",
                   layout,
-                  imageSize,
-                  clipPosPercent: [0, 0],
-                  clipSizePercent: [clipWidthPercent, clipHeightPercent],
+                  clipHeightPercent,
+                  clipWidthPercent,
+                  clipTopPercent: 0,
+                  clipLeftPercent: 0,
+                  ...getPrintParams({
+                    paperSize: [photoSize?.w || 0, photoSize?.h || 0],
+                    clipType: "auto",
+                    layout,
+                    imageSize,
+                    clipPosPercent: [0, 0],
+                    clipSizePercent: [clipWidthPercent, clipHeightPercent],
+                  }),
                 }),
-              }),
-            },
-            body: formData,
-            onUploadProgress(e: any) {
-              onProgress({
-                total: e.total,
-                loaded: e.loaded,
-              });
-            },
-            async onSuccess(res: any) {
-              onSuccess(res);
+              },
+              body: formData,
+              onUploadProgress(e: any) {
+                onProgress({
+                  total: e.total,
+                  loaded: e.loaded,
+                });
+                setPercent((e.loaded / e.total) * 100);
+              },
+              async onSuccess(res: any) {
+                onSuccess(res);
+                setPercent(0);
 
-              const nextIndex = currentIndexRef.current + 1;
-              setCurrentIndex(nextIndex);
-              currentIndexRef.current = nextIndex;
-              if (nextIndex >= totalRef.current) {
-                setUploading(false);
-                refreshOrder();
-              }
+                const nextIndex = currentIndexRef.current + 1;
+                setCurrentIndex(nextIndex);
+                currentIndexRef.current = nextIndex;
 
-              const imgUrl = await fileToDataURL(fileInstance);
-              setImageCache((prev: any) => [
-                ...prev,
-                { url: imgUrl, key: res.key },
-              ]);
-            },
-            onError(err: any) {
-              onError(err);
-              const nextIndex = currentIndexRef.current + 1;
-              setCurrentIndex(nextIndex);
-              currentIndexRef.current = nextIndex;
-              if (nextIndex >= totalRef.current) {
-                setUploading(false);
-                refreshOrder();
-              }
-            },
-          });
-          // const imageUrl = await fileToDataURL(fileInstance);
-          // setImageList((prev: any) => [
-          //   ...prev,
-          //   {
-          //     url: imageUrl,
-          //     count: 1,
-          //   },
-          // ]);
+                const imgUrl = await fileToDataURL(fileInstance);
+                setImageCache((prev: any) => [
+                  ...prev,
+                  { url: imgUrl, key: res.id },
+                ]);
+
+                if (nextIndex >= totalRef.current) {
+                  setUploading(false);
+                  refreshOrder();
+                }
+              },
+              onError(err: any) {
+                onError(err);
+                setPercent(0);
+                const nextIndex = currentIndexRef.current + 1;
+                setCurrentIndex(nextIndex);
+                currentIndexRef.current = nextIndex;
+                if (nextIndex >= totalRef.current) {
+                  setUploading(false);
+                  refreshOrder();
+                }
+              },
+            }),
+          );
         }}
       >
         <Button
