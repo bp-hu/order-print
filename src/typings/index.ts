@@ -1,4 +1,4 @@
-export type ClipType = "auto" | "margin" | "single";
+export type ClipType = "auto" | "margin" | "single" | "around";
 export type ClipLayout = "horizontal" | "vertical";
 export type EditParams = {
   count: number;

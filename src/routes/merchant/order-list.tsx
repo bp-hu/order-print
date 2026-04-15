@@ -57,6 +57,13 @@ export function OrderList({ filterValue }: { filterValue: FilterValue }) {
     refresh();
   }, []);
 
+  useEffect(() => {
+    setPagination({
+      ...pagination,
+      currentPage: 1,
+    });
+  }, [filterValue]);
+
   return (
     <div>
       <Table
