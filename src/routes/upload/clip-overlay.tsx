@@ -1,29 +1,30 @@
+import { ClipLayout } from "@/typings";
+import { getPaperRatioByLayout } from "@/utils";
 import { cn } from "@auix/utils";
-import { useEffect, useRef, useState } from "react";
 
 export function ClipOverlay({
   className,
-  isVertical,
+  layout,
+  paperRatio,
+  imageRatio,
   clipPosPercent,
   clipSizePercent,
+  containerSize,
 }: {
   className?: string;
-  isVertical: boolean;
+  paperRatio: number;
+  imageRatio: number;
+  layout: ClipLayout;
   clipPosPercent: [number, number];
   clipSizePercent: [number, number];
+  containerSize: [number, number];
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState<number>(0);
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (containerRef.current) {
-        setContainerHeight(containerRef.current.clientHeight);
-        setContainerWidth(containerRef.current.clientWidth);
-      }
-    }, 500);
-  }, []);
+  const [containerHeight, containerWidth] = containerSize;
+  const clipRatio = getPaperRatioByLayout({
+    layout,
+    paperRatio,
+  });
+  const isVertical = imageRatio <= clipRatio;
 
   const clipTop = clipPosPercent[1] * containerHeight;
   const clipHeight = clipSizePercent[1] * containerHeight;
@@ -32,7 +33,7 @@ export function ClipOverlay({
 
   return (
     <div
-      ref={containerRef}
+      data-slot="clip-overlay"
       className={cn("absolute top-0 left-0 w-full h-full", className)}
     >
       <div

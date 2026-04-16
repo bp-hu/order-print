@@ -6,7 +6,6 @@ interface ClipProps {
   containerSize: [number, number];
   imageSize: [number, number];
   paperRatio: number;
-  isAuto?: boolean;
 }
 
 export function getPaperRatioByLayout({
@@ -25,6 +24,9 @@ export function getPaperRatioByLayout({
     : paperRatioProp;
 }
 
+/**
+ * 根据容器大小和纸张比例计算相框大小
+ */
 export function getFrameSizeFromContainer({
   layout,
   containerSize,
@@ -49,26 +51,29 @@ export function getFrameSizeFromContainer({
   let frameWidth = 0;
   let frameHeight = 0;
 
-  if (isHorizontal) {
-    frameWidth = containerWidth;
-    frameHeight =
-      paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
-  } else {
-    frameHeight = containerHeight;
-    frameWidth =
-      paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
-  }
-
   if (isAuto) {
     frameWidth =
       width > height ? containerWidth : (containerHeight / height) * width;
     frameHeight =
       width > height ? (containerWidth / width) * height : containerHeight;
+  } else {
+    if (isHorizontal) {
+      frameWidth = containerWidth;
+      frameHeight =
+        paperRatio < 1 ? frameWidth * paperRatio : frameWidth / paperRatio;
+    } else {
+      frameHeight = containerHeight;
+      frameWidth =
+        paperRatio < 1 ? frameHeight * paperRatio : frameHeight / paperRatio;
+    }
   }
 
   return [frameWidth, frameHeight];
 }
 
+/**
+ * 获取裁剪参数：裁剪框大小、裁剪框比例、裁剪百分比（相对于相框）
+ */
 export function getClipParams({
   layout,
   paperRatio,
@@ -123,24 +128,33 @@ export function getClipParams({
   };
 }
 
+/**
+ * 获取裁剪尺寸：相框尺寸、照片尺寸
+ */
 export function getClipSize({
   layout,
   containerSize,
   paperRatio: paperRatioProp,
-  isAuto = false,
+  clipType,
   imageSize,
-}: ClipProps): {
+}: ClipProps & {
+  clipType?: ClipType;
+}): {
   frameWidth: number;
   frameHeight: number;
   imageWidth: number;
   imageHeight: number;
 } {
-  const [containerWidth, containerHeight] = containerSize;
   const [width, height] = imageSize;
   const imageRatio = width / height;
+  const isAuto = ["auto", "around"].includes(clipType || "");
   const [frameWidth, frameHeight] = getFrameSizeFromContainer({
     layout,
-    containerSize,
+    containerSize:
+      // 四周留白：边框留 4%
+      clipType === "around"
+        ? [containerSize[0] * 0.96, containerSize[1] * 0.96]
+        : containerSize,
     paperRatio: paperRatioProp,
     isAuto,
     imageSize,
@@ -148,13 +162,6 @@ export function getClipSize({
 
   let imageWidth = 0;
   let imageHeight = 0;
-
-  if (isAuto) {
-    imageWidth =
-      width > height ? containerWidth : (containerHeight / height) * width;
-    imageHeight =
-      width > height ? (containerWidth / width) * height : containerHeight;
-  }
 
   const isHorizontal = layout === "horizontal";
   const isVertical = !isHorizontal;
@@ -179,6 +186,9 @@ export function getClipSize({
   };
 }
 
+/**
+ * 获取格式化的打印参数（用于后端处理图片）
+ */
 export function getPrintParams({
   paperSize,
   clipType,
@@ -186,7 +196,7 @@ export function getPrintParams({
   clipSizePercent,
   imageSize,
   ...props
-}: Omit<ClipProps, "paperRatio" | "isAuto" | "containerSize"> & {
+}: Omit<ClipProps, "paperRatio" | "containerSize"> & {
   paperSize: [number, number];
   clipType: ClipType;
   clipPosPercent: [number, number];
@@ -195,7 +205,6 @@ export function getPrintParams({
   const [paperWidth, paperHeight] = paperSize;
   const paperRatioProp = paperSize[0] / paperSize[1];
   const imageRatio = imageSize[0] / imageSize[1];
-  const isAuto = clipType === "auto";
   const {
     frameHeight,
     frameWidth,
@@ -204,11 +213,12 @@ export function getPrintParams({
   } = getClipSize({
     ...props,
     paperRatio: paperRatioProp,
-    isAuto,
+    clipType,
     containerSize: DEFAULT_CONTAINER_SIZE,
     imageSize,
   });
 
+  // 根据纸张尺寸等比计算照片尺寸和留白尺寸
   const imageWidth = (paperWidth / frameWidth) * zoomImageWidth;
   const imageHeight = (paperHeight / frameHeight) * zoomImageHeight;
   const blankWidth = paperWidth - imageWidth;
@@ -288,6 +298,11 @@ export function getPrintParams({
     (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1)
       ? 1 / paperRatioProp
       : paperRatioProp;
+
+  const isAround = clipType === "around";
+  const blankX = isAround ? 0.04 * imageWidth : 0;
+  const blankY = isAround ? 0.04 * imageHeight : 0;
+
   if (imageRatio <= paperRatio) {
     const clipTop = clipPosPercent[0] * paperHeight;
     const clipHeight = clipSizePercent[1] * paperHeight;
@@ -297,10 +312,10 @@ export function getPrintParams({
       start_y: clipTop,
       end_x: imageWidth,
       end_y: clipHeight + clipTop,
-      blank_top: 0,
-      blank_bottom: 0,
-      blank_left: 0,
-      blank_right: 0,
+      blank_top: blankY,
+      blank_bottom: blankY,
+      blank_left: blankX,
+      blank_right: blankX,
       photo_w: imageWidth,
       photo_h: imageHeight,
     };
@@ -314,10 +329,10 @@ export function getPrintParams({
       start_y: 0,
       end_x: clipWidth + clipLeft,
       end_y: imageHeight,
-      blank_top: 0,
-      blank_bottom: 0,
-      blank_left: 0,
-      blank_right: 0,
+      blank_top: blankY,
+      blank_bottom: blankY,
+      blank_left: blankX,
+      blank_right: blankX,
       photo_w: imageWidth,
       photo_h: imageHeight,
     };

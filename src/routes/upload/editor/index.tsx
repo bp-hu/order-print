@@ -129,7 +129,7 @@ function Editor({
             editParams.naturalHeight || 0,
           ]}
         >
-          {editParams.clipType === "auto"
+          {["auto", "around"].includes(editParams.clipType)
             ? ({ containerSize, paperRatio, layout }) => (
                 <Clip
                   containerSize={containerSize}
@@ -202,6 +202,13 @@ function Editor({
                 active: editParams.clipType === "auto",
                 onClick: () =>
                   setEditParams({ ...editParams, clipType: "auto" }),
+              },
+              {
+                icon: <IconColorPalette />,
+                label: "四周留白",
+                active: editParams.clipType === "around",
+                onClick: () =>
+                  setEditParams({ ...editParams, clipType: "around" }),
               },
               ...(["1英寸", "2英寸"].includes(order?.photo_size || "")
                 ? []

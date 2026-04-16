@@ -69,7 +69,7 @@ export const ClipPreview = ({
           containerSize: size,
           imageSize,
           paperRatio,
-          isAuto: clipType === "auto",
+          clipType,
         }),
       );
       setInited(true);
@@ -87,8 +87,6 @@ export const ClipPreview = ({
       />
     );
   }
-
-  const imageRatio = imageSize[0] / imageSize[1];
 
   return (
     <div
@@ -111,15 +109,17 @@ export const ClipPreview = ({
       <div
         style={
           {
-            "--width": `${clipSize.frameWidth}px`,
-            "--height": `${clipSize.frameHeight}px`,
+            "--width": `${clipType === "around" ? clipSize.frameWidth / 0.96 : clipSize.frameWidth}px`,
+            "--height": `${clipType === "around" ? clipSize.frameHeight / 0.96 : clipSize.frameHeight}px`,
           } as any
         }
         data-slot="frame"
         className={cn(
-          "relative bg-white flex border border-border-1 overflow-hidden",
+          "relative bg-white flex border border-border-1 overflow-hidden w-(--width) h-(--height)",
           {
-            "w-(--width) h-(--height)": clipType !== "auto",
+            "items-center justify-center": ["auto", "around"].includes(
+              clipType,
+            ),
             "items-center": clipType === "margin",
             "justify-center": clipType === "margin",
           },
@@ -158,21 +158,41 @@ export const ClipPreview = ({
             }}
           />
         </div>
-        {(typeof children === "function"
-          ? children({
-              ...clipSize,
-              paperRatio,
-              layout,
-              containerSize: size,
-            })
-          : children) ??
-          (clipType === "auto" ? (
-            <ClipOverlay
-              isVertical={imageRatio <= paperRatio}
-              clipPosPercent={clipPosPercent || [0, 0]}
-              clipSizePercent={clipSizePercent || [0, 0]}
-            />
-          ) : null)}
+        <div
+          style={
+            {
+              "--width": `${clipSize.frameWidth}px`,
+              "--height": `${clipSize.frameHeight}px`,
+            } as any
+          }
+          className="absolute w-(--width) h-(--height)"
+        >
+          {(typeof children === "function"
+            ? children({
+                ...clipSize,
+                paperRatio,
+                layout,
+                containerSize:
+                  clipType === "around"
+                    ? [containerWidth * 0.96, containerHeight * 0.96]
+                    : size,
+              })
+            : children) ??
+            (["auto", "around"].includes(clipType) ? (
+              <ClipOverlay
+                layout={layout}
+                paperRatio={paperRatio}
+                imageRatio={imageSize[0] / imageSize[1]}
+                clipPosPercent={clipPosPercent || [0, 0]}
+                clipSizePercent={clipSizePercent || [0, 0]}
+                containerSize={
+                  clipType === "around"
+                    ? [containerWidth * 0.96, containerHeight * 0.96]
+                    : size
+                }
+              />
+            ) : null)}
+        </div>
       </div>
     </div>
   );
