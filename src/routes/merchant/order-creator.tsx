@@ -6,7 +6,7 @@ import { FormApi } from "@douyinfe/semi-ui/lib/es/form";
 import { useRequest } from "@safe-fe/hooks";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
-import { orderTypeListAtom, refreshOrderlistAtom } from "./store";
+import { orderTypeListAtom, refreshOrderListAtom } from "./store";
 
 export function OrderCreator() {
   const { run: createOrder, loading } = useRequest((params) =>
@@ -20,7 +20,7 @@ export function OrderCreator() {
         refresh();
       }),
   );
-  const refresh = useSetAtom(refreshOrderlistAtom);
+  const refresh = useSetAtom(refreshOrderListAtom);
   const [visible, setVisible] = useState(false);
   const formRef = useRef<FormApi>(undefined);
   const orderTypeList = useAtomValue(orderTypeListAtom);
@@ -49,43 +49,67 @@ export function OrderCreator() {
         }}
       >
         <Form getFormApi={(formApi) => (formRef.current = formApi)}>
-          <Form.Input
-            rules={[{ required: true, message: "请输入订单 ID" }]}
-            label="订单 ID"
-            field="order_number"
-            placeholder="请输入订单 ID"
-          />
-          <Form.Input
-            rules={[{ required: true, message: "请输入订单名称" }]}
-            label="订单名称"
-            field="order_name"
-            placeholder="请输入订单名称"
-          />
-          <Form.Select
-            rules={[{ required: true, message: "请输入订单类型" }]}
-            label="订单类型"
-            field="order_type"
-            placeholder="请输入订单类型"
-            optionList={orderTypeList.map((v) => ({
-              label: v,
-              value: v,
-            }))}
-          />
-          <Form.Select
-            rules={[{ required: true, message: "请输入照片尺寸" }]}
-            label="照片尺寸"
-            field="photo_size"
-            placeholder="请输入照片尺寸"
-            optionList={Object.keys(PHOTO_SIZES).map((k) => ({
-              label: k,
-              value: k,
-            }))}
-          />
-          <Form.InputNumber
-            rules={[{ required: true, message: "请输入最大照片数量" }]}
-            label="最大照片数量"
-            field="max_photo_count"
-          />
+          {({ values }) => (
+            <>
+              <Form.Input
+                rules={[{ required: true, message: "请输入订单 ID" }]}
+                label="订单 ID"
+                field="order_number"
+                placeholder="请输入订单 ID"
+              />
+              <Form.Input
+                rules={[{ required: true, message: "请输入订单名称" }]}
+                label="订单名称"
+                field="order_name"
+                placeholder="请输入订单名称"
+              />
+              <Form.Select
+                rules={[{ required: true, message: "请输入订单类型" }]}
+                label="订单类型"
+                field="order_type"
+                placeholder="请输入订单类型"
+                optionList={orderTypeList.map((v) => ({
+                  label: v,
+                  value: v,
+                }))}
+              />
+              <Form.Select
+                rules={[{ required: true, message: "请输入照片尺寸" }]}
+                label="照片尺寸"
+                field="photo_size"
+                placeholder="请输入照片尺寸"
+                optionList={[
+                  {
+                    label: "自定义尺寸",
+                    value: "自定义",
+                  },
+                  ...Object.keys(PHOTO_SIZES).map((k) => ({
+                    label: k,
+                    value: k,
+                  })),
+                ]}
+              />
+              {values.photo_size === "自定义" && (
+                <>
+                  <Form.InputNumber
+                    rules={[{ required: true, message: "请输入照片宽度" }]}
+                    label="照片宽度(mm)"
+                    field="paper_w"
+                  />
+                  <Form.InputNumber
+                    rules={[{ required: true, message: "请输入照片高度" }]}
+                    label="照片高度(mm)"
+                    field="paper_h"
+                  />
+                </>
+              )}
+              <Form.InputNumber
+                rules={[{ required: true, message: "请输入最大照片数量" }]}
+                label="最大照片数量"
+                field="max_photo_count"
+              />
+            </>
+          )}
         </Form>
       </Modal>
     </>

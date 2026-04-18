@@ -1,4 +1,4 @@
-import { DEFAULT_CONTAINER_SIZE, PHOTO_SIZES } from "@/consts";
+import { DEFAULT_CONTAINER_SIZE } from "@/consts";
 import {
   countAtom,
   imageCacheAtom,
@@ -113,8 +113,10 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
           const { naturalWidth, naturalHeight } =
             await getImageSize(fileInstance);
           const imageSize = [naturalWidth, naturalHeight] as [number, number];
-          const photoSize =
-            PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
+          const photoSize = {
+            w: order?.paper_w || 0,
+            h: order?.paper_h || 0,
+          };
           const layout =
             naturalWidth >= naturalHeight ? "horizontal" : "vertical";
           const frameSize = getFrameSizeFromContainer({

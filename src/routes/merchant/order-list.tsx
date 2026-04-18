@@ -11,19 +11,20 @@ import { PreviewImages } from "./preview-images";
 import {
   batchModeAtom,
   orderListAtom,
-  refreshOrderlistAtom,
+  refreshOrderListAtom,
   selectedKeysAtom,
 } from "./store";
 
 export function OrderList({ filterValue }: { filterValue: FilterValue }) {
   const orderList = useAtomValue(orderListAtom);
   const batchMode = useAtomValue(batchModeAtom);
-  const refresh = useSetAtom(refreshOrderlistAtom);
+  const refresh = useSetAtom(refreshOrderListAtom);
   const [selectedKeys, setSelectedKeys] = useAtom(selectedKeysAtom);
   const [pagination, setPagination] = useState({
     pageSize: 10,
     currentPage: 1,
   });
+  console.log("****orderList: ", orderList);
   const filteredData = useMemo(
     () =>
       orderList.filter((v) => {

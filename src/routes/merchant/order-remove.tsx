@@ -3,13 +3,13 @@ import { IconDelete } from "@douyinfe/semi-icons";
 import { Button, Modal } from "@douyinfe/semi-ui";
 import { useRequest } from "@safe-fe/hooks";
 import { useSetAtom } from "jotai";
-import { refreshOrderlistAtom } from "./store";
+import { refreshOrderListAtom } from "./store";
 
 export function OrderRemove({ orderNumber }: { orderNumber: string }) {
   const { run: deleteOrder, loading } = useRequest(() =>
     http.delete(`/orders/${orderNumber}`),
   );
-  const refresh = useSetAtom(refreshOrderlistAtom);
+  const refresh = useSetAtom(refreshOrderListAtom);
 
   return (
     <Button

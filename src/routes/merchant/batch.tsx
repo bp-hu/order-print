@@ -9,14 +9,14 @@ import { useRef, useState } from "react";
 import {
   batchModeAtom,
   merchantStatusAtom,
-  refreshOrderlistAtom,
+  refreshOrderListAtom,
   selectedKeysAtom,
 } from "./store";
 
 export function Batch() {
   const [batchMode, setBatchMode] = useAtom(batchModeAtom);
   const [selectedKeys, setSelectedKeys] = useAtom(selectedKeysAtom);
-  const refresh = useSetAtom(refreshOrderlistAtom);
+  const refresh = useSetAtom(refreshOrderListAtom);
   const [visible, setVisible] = useState(false);
   const formRef = useRef<FormApi>(undefined);
   const merchantStatus = useAtomValue(merchantStatusAtom);
@@ -63,10 +63,13 @@ export function Batch() {
                       </ul>
                     </div>
                   ),
-                  onOk() {
-                    download(
-                      `/api/v1/images/${selectedKeys.join(",")}/orders_zip/download_zip`,
+                  async onOk() {
+                    const res = await http.get(
+                      `/images/${selectedKeys.join(",")}/orders_zip/download_zip`,
                     );
+                    (res.downloads || []).forEach((item) => {
+                      download(item.url);
+                    });
                     setSelectedKeys([]);
                     setBatchMode(false);
                   },

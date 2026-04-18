@@ -49,4 +49,6 @@ export interface IOrder {
   express: Record<string, any>;
   created_at: string;
   updated_at: string;
+  paper_h?: number;
+  paper_w?: number;
 }

@@ -1,4 +1,3 @@
-import { PHOTO_SIZES } from "@/consts";
 import { getImageInfoList } from "@/servers";
 import { IOrder } from "@/typings/index";
 import { http } from "@/utils/http";
@@ -86,7 +85,12 @@ export const refreshOrderAtom = atom(null, async (get, set) => {
 });
 export const paperRatioAtom = atom<number>((get) => {
   const order = get(orderAtom);
-  const photoSize = PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
+  const photoSize = order
+    ? {
+        w: order.paper_w || 0,
+        h: order.paper_h || 0,
+      }
+    : undefined;
   return photoSize ? photoSize.w / photoSize.h : 0.4;
 });
 export const orderIsDoneAtom = atom<boolean>((get) => {

@@ -4,6 +4,7 @@ import { Batch } from "./batch";
 import { Filter, FilterValue } from "./filter";
 import { Login } from "./login";
 import { OrderCreator } from "./order-creator";
+import { OrderHistory } from "./order-history";
 import { OrderList } from "./order-list";
 import { merchantIdAtom } from "./store";
 
@@ -26,6 +27,7 @@ export default function MerchantPage() {
         <div className="flex items-center gap-md">
           <Batch />
           <OrderCreator />
+          <OrderHistory />
         </div>
       </div>
       <OrderList filterValue={filterValue} />

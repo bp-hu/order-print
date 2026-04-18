@@ -11,7 +11,7 @@ import {
   customerStatusAtom,
   merchantStatusAtom,
   orderTypeListAtom,
-  refreshOrderlistAtom,
+  refreshOrderListAtom,
 } from "./store";
 
 export function OrderEdit({ order }: { order: IOrder }) {
@@ -27,7 +27,7 @@ export function OrderEdit({ order }: { order: IOrder }) {
         refresh();
       }),
   );
-  const refresh = useSetAtom(refreshOrderlistAtom);
+  const refresh = useSetAtom(refreshOrderListAtom);
   const formRef = useRef<FormApi>(undefined);
   const customerStatus = useAtomValue(customerStatusAtom);
   const merchantStatus = useAtomValue(merchantStatusAtom);

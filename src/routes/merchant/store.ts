@@ -9,7 +9,7 @@ export const merchantStatusAtom = atom<string[]>([]);
 export const orderTypeListAtom = atom<string[]>([]);
 export const selectedKeysAtom = atom<string[]>([]);
 export const batchModeAtom = atom<boolean>(false);
-export const refreshOrderlistAtom = atom(null, async (_, set) => {
+export const refreshOrderListAtom = atom(null, async (_, set) => {
   set(loadingAtom, true);
   try {
     const [orderList, customerStatus, merchantStatus, orderTypeList] =
