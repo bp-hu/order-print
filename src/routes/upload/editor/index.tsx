@@ -130,9 +130,9 @@ function Editor({
           ]}
         >
           {["auto", "around"].includes(editParams.clipType)
-            ? ({ containerSize, paperRatio, layout }) => (
+            ? ({ frameWidth, frameHeight, paperRatio, layout }) => (
                 <Clip
-                  containerSize={containerSize}
+                  frameSize={[frameWidth, frameHeight]}
                   layout={layout}
                   paperRatio={paperRatio}
                   defaultClipPosPercent={[

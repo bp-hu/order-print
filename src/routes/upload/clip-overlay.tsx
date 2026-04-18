@@ -1,4 +1,4 @@
-import { ClipLayout } from "@/typings";
+import { ClipLayout, ClipType } from "@/typings";
 import { getPaperRatioByLayout } from "@/utils";
 import { cn } from "@auix/utils";
 
@@ -10,6 +10,7 @@ export function ClipOverlay({
   clipPosPercent,
   clipSizePercent,
   containerSize,
+  clipType,
 }: {
   className?: string;
   paperRatio: number;
@@ -18,8 +19,18 @@ export function ClipOverlay({
   clipPosPercent: [number, number];
   clipSizePercent: [number, number];
   containerSize: [number, number];
+  clipType: ClipType;
 }) {
-  const [containerHeight, containerWidth] = containerSize;
+  const [_containerHeight, _containerWidth] = containerSize;
+  const maxContainerLength = Math.max(_containerHeight, _containerWidth);
+  const containerHeight =
+    clipType === "around"
+      ? _containerHeight - 0.04 * maxContainerLength
+      : _containerHeight;
+  const containerWidth =
+    clipType === "around"
+      ? _containerWidth - 0.04 * maxContainerLength
+      : _containerWidth;
   const clipRatio = getPaperRatioByLayout({
     layout,
     paperRatio,
@@ -27,9 +38,11 @@ export function ClipOverlay({
   const isVertical = imageRatio <= clipRatio;
 
   const clipTop = clipPosPercent[1] * containerHeight;
-  const clipHeight = clipSizePercent[1] * containerHeight;
+  const clipHeight =
+    clipSizePercent[1] * containerHeight - 0.04 * maxContainerLength;
   const clipLeft = clipPosPercent[0] * containerWidth;
-  const clipWidth = clipSizePercent[0] * containerWidth;
+  const clipWidth =
+    clipSizePercent[0] * containerWidth - 0.04 * maxContainerLength;
 
   return (
     <div

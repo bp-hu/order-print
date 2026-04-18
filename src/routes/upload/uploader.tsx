@@ -7,7 +7,13 @@ import {
   refreshOrderAtom,
   totalAtom,
 } from "@/stores";
-import { fileToDataURL, getClipParams, getPrintParams, single } from "@/utils";
+import {
+  fileToDataURL,
+  getClipParams,
+  getFrameSizeFromContainer,
+  getPrintParams,
+  single,
+} from "@/utils";
 import { getImageSize } from "@/utils/get-image-size";
 import { http } from "@/utils/http";
 import { IconUpload } from "@douyinfe/semi-icons";
@@ -111,10 +117,17 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
             PHOTO_SIZES[order?.photo_size as keyof typeof PHOTO_SIZES];
           const layout =
             naturalWidth >= naturalHeight ? "horizontal" : "vertical";
+          const frameSize = getFrameSizeFromContainer({
+            layout,
+            containerSize: DEFAULT_CONTAINER_SIZE,
+            paperRatio: photoSize?.w / photoSize?.h,
+            isAuto: true,
+            imageSize,
+          });
           const { clipHeightPercent, clipWidthPercent } = getClipParams({
             layout,
             paperRatio: photoSize?.w / photoSize?.h,
-            containerSize: DEFAULT_CONTAINER_SIZE,
+            frameSize,
             imageSize,
           });
 

@@ -109,8 +109,8 @@ export const ClipPreview = ({
       <div
         style={
           {
-            "--width": `${clipType === "around" ? clipSize.frameWidth / 0.96 : clipSize.frameWidth}px`,
-            "--height": `${clipType === "around" ? clipSize.frameHeight / 0.96 : clipSize.frameHeight}px`,
+            "--width": `${clipSize.frameWidth}px`,
+            "--height": `${clipSize.frameHeight}px`,
           } as any
         }
         data-slot="frame"
@@ -161,8 +161,8 @@ export const ClipPreview = ({
         <div
           style={
             {
-              "--width": `${clipSize.frameWidth}px`,
-              "--height": `${clipSize.frameHeight}px`,
+              "--width": `${clipSize.imageWidth}px`,
+              "--height": `${clipSize.imageHeight}px`,
             } as any
           }
           className="absolute w-(--width) h-(--height)"
@@ -170,26 +170,22 @@ export const ClipPreview = ({
           {(typeof children === "function"
             ? children({
                 ...clipSize,
+                frameWidth: clipSize.imageWidth,
+                frameHeight: clipSize.imageHeight,
                 paperRatio,
                 layout,
-                containerSize:
-                  clipType === "around"
-                    ? [containerWidth * 0.96, containerHeight * 0.96]
-                    : size,
+                containerSize: size,
               })
             : children) ??
             (["auto", "around"].includes(clipType) ? (
               <ClipOverlay
+                clipType={clipType}
                 layout={layout}
                 paperRatio={paperRatio}
                 imageRatio={imageSize[0] / imageSize[1]}
                 clipPosPercent={clipPosPercent || [0, 0]}
                 clipSizePercent={clipSizePercent || [0, 0]}
-                containerSize={
-                  clipType === "around"
-                    ? [containerWidth * 0.96, containerHeight * 0.96]
-                    : size
-                }
+                containerSize={size}
               />
             ) : null)}
         </div>

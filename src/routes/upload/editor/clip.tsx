@@ -1,5 +1,5 @@
 import { ClipLayout } from "@/typings";
-import { getClipParams, getFrameSizeFromContainer } from "@/utils";
+import { getClipParams } from "@/utils";
 import { cn, useDebounceFn, useUpdateEffect } from "@auix/utils";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
@@ -13,7 +13,7 @@ export function Clip({
   paperRatio,
   imageSize,
   disabled,
-  containerSize,
+  frameSize,
 }: {
   className?: string;
   style?: CSSProperties;
@@ -22,7 +22,7 @@ export function Clip({
   imageSize: [number, number];
   disabled?: boolean;
   defaultClipPosPercent?: [number, number];
-  containerSize: [number, number];
+  frameSize: [number, number];
   onMove: (props: {
     clipTopPercent: number;
     clipLeftPercent: number;
@@ -32,18 +32,11 @@ export function Clip({
 }) {
   const nodeRef = useRef<HTMLDivElement>(null);
   const imageRatio = imageSize[0] / imageSize[1];
-  const [frameWidth, frameHeight] = getFrameSizeFromContainer({
-    layout,
-    containerSize,
-    paperRatio,
-    isAuto: true,
-    imageSize,
-  });
+  const [frameWidth, frameHeight] = frameSize;
   const [position, setPosition] = useState({
     x: (defaultClipPosPercent?.[0] || 0) * frameWidth,
     y: (defaultClipPosPercent?.[1] || 0) * frameHeight,
   });
-
   const { x: clipLeft, y: clipTop } = position;
 
   const {
@@ -55,7 +48,7 @@ export function Clip({
   } = getClipParams({
     layout,
     paperRatio,
-    containerSize,
+    frameSize,
     imageSize,
   });
   const isVertical = imageRatio <= clipRatio;

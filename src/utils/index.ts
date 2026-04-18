@@ -39,7 +39,7 @@ export function getFrameSizeFromContainer({
   imageSize: [number, number];
   paperRatio: number;
   isAuto?: boolean;
-}) {
+}): [number, number] {
   const [width, height] = imageSize;
   const [containerWidth, containerHeight] = containerSize;
   const isHorizontal = layout === "horizontal";
@@ -78,21 +78,15 @@ export function getClipParams({
   layout,
   paperRatio,
   imageSize,
-  containerSize,
+  frameSize,
 }: {
   layout: "horizontal" | "vertical";
   paperRatio: number;
-  containerSize: [number, number];
+  frameSize: [number, number];
   imageSize: [number, number];
 }) {
   const imageRatio = imageSize[0] / imageSize[1];
-  const [frameWidth, frameHeight] = getFrameSizeFromContainer({
-    layout,
-    containerSize,
-    paperRatio,
-    isAuto: true,
-    imageSize,
-  });
+  const [frameWidth, frameHeight] = frameSize;
   const clipRatio = getPaperRatioByLayout({
     layout,
     paperRatio,
@@ -150,11 +144,7 @@ export function getClipSize({
   const isAuto = ["auto", "around"].includes(clipType || "");
   const [frameWidth, frameHeight] = getFrameSizeFromContainer({
     layout,
-    containerSize:
-      // 四周留白：边框留 4%
-      clipType === "around"
-        ? [containerSize[0] * 0.96, containerSize[1] * 0.96]
-        : containerSize,
+    containerSize,
     paperRatio: paperRatioProp,
     isAuto,
     imageSize,
@@ -169,12 +159,15 @@ export function getClipSize({
     (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1)
       ? 1 / paperRatioProp
       : paperRatioProp;
+  const maxFrameLength = Math.max(frameWidth, frameHeight);
 
   if (paperRatio <= imageRatio) {
-    imageWidth = frameWidth;
+    imageWidth =
+      clipType === "around" ? frameWidth - 0.04 * maxFrameLength : frameWidth;
     imageHeight = (imageWidth / width) * height;
   } else {
-    imageHeight = frameHeight;
+    imageHeight =
+      clipType === "around" ? frameHeight - 0.04 * maxFrameLength : frameHeight;
     imageWidth = (imageHeight / height) * width;
   }
 
@@ -291,7 +284,6 @@ export function getPrintParams({
   }
 
   /** 智能裁剪 */
-  // 高度裁剪
   const isHorizontal = props.layout === "horizontal";
   const isVertical = !isHorizontal;
   const paperRatio =
@@ -300,12 +292,14 @@ export function getPrintParams({
       : paperRatioProp;
 
   const isAround = clipType === "around";
-  const blankX = isAround ? 0.04 * imageWidth : 0;
-  const blankY = isAround ? 0.04 * imageHeight : 0;
+  const maxImageLength = Math.max(imageWidth, imageHeight);
+  const blankX = isAround ? 0.04 * maxImageLength : 0;
+  const blankY = isAround ? 0.04 * maxImageLength : 0;
 
+  // 高度裁剪
   if (imageRatio <= paperRatio) {
-    const clipTop = clipPosPercent[0] * paperHeight;
-    const clipHeight = clipSizePercent[1] * paperHeight;
+    const clipTop = clipPosPercent[0] * (paperHeight - blankY);
+    const clipHeight = clipSizePercent[1] * (paperHeight - blankY);
 
     return {
       start_x: 0,
@@ -321,8 +315,8 @@ export function getPrintParams({
     };
   } else {
     // 宽度裁剪
-    const clipLeft = clipPosPercent[1] * paperWidth;
-    const clipWidth = clipSizePercent[0] * paperWidth;
+    const clipLeft = clipPosPercent[1] * (paperWidth - blankX);
+    const clipWidth = clipSizePercent[0] * (paperWidth - blankX);
 
     return {
       start_x: clipLeft,
