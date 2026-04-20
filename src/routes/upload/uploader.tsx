@@ -1,12 +1,5 @@
 import { DEFAULT_CONTAINER_SIZE } from "@/consts";
-import {
-  countAtom,
-  imageCacheAtom,
-  orderAtom,
-  orderIdAtom,
-  refreshOrderAtom,
-  totalAtom,
-} from "@/stores";
+import { imageCacheAtom, refreshOrderAtom } from "@/stores";
 import {
   fileToDataURL,
   getClipParams,
@@ -23,16 +16,17 @@ import { useAtomValue, useSetAtom } from "jotai";
 import PQueue from "p-queue";
 import { stringify } from "qs";
 import { forwardRef, useRef, useState } from "react";
+import { countAtom, subOrderAtom, subOrderIdAtom, totalAtom } from "./store";
 
 const uploadQueue = new PQueue({ concurrency: 1 });
 
 export const Uploader = forwardRef<Upload, any>((props, ref) => {
   const total = useAtomValue(totalAtom);
   const count = useAtomValue(countAtom);
-  const order = useAtomValue(orderAtom);
+  const order = useAtomValue(subOrderAtom);
   const refreshOrder = useSetAtom(refreshOrderAtom);
   const setImageCache = useSetAtom(imageCacheAtom);
-  const orderId = useAtomValue(orderIdAtom);
+  const orderId = useAtomValue(subOrderIdAtom);
   const [uploading, setUploading] = useState<boolean>(false);
   const totalRef = useRef<number>(0);
   const [currentIndex, setCurrentIndex] = useState<number>(0);

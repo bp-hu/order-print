@@ -3,7 +3,7 @@ import {
   getImageInfo,
   recoverHistoryImageList,
 } from "@/servers";
-import { orderAtom, refreshOrderAtom } from "@/stores";
+import { refreshOrderAtom } from "@/stores";
 import { TImage } from "@/typings";
 import {
   IconCheckCircleStroked,
@@ -24,12 +24,13 @@ import {
 import dayjs from "dayjs";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
+import { subOrderAtom } from "./store";
 
 const { Text } = Typography;
 
 export default () => {
   const [visible, setVisible] = useState(false);
-  const order = useAtomValue(orderAtom);
+  const order = useAtomValue(subOrderAtom);
   const refreshOrder = useSetAtom(refreshOrderAtom);
   const imageIds = order?.history_images || [];
   const [images, setImages] = useState([] as TImage[]);

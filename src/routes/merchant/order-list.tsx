@@ -24,7 +24,7 @@ export function OrderList({ filterValue }: { filterValue: FilterValue }) {
     pageSize: 10,
     currentPage: 1,
   });
-  console.log("****orderList: ", orderList);
+
   const filteredData = useMemo(
     () =>
       orderList.filter((v) => {

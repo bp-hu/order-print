@@ -15,6 +15,7 @@ specifiers:
   '@safe-fe/hooks': ^3.1.4
   '@safe-fe/utils': ^2.0.5
   '@tailwindcss/postcss': 4.1.18
+  '@types/lodash-es': ^4.17.12
   '@types/node': ^20
   '@types/qs': ^6.14.0
   '@types/react': ~18.3.12
@@ -23,6 +24,7 @@ specifiers:
   jotai: ^2.17.1
   lint-staged: ~13.1.0
   localforage: ^1.10.0
+  lodash-es: ^4.18.1
   p-queue: ^9.1.2
   prettier: ^3.4.2
   qs: ^6.15.0
@@ -48,6 +50,7 @@ dependencies:
   dayjs: 1.11.20
   jotai: 2.19.0_kejy6fftrwj3obyl7hsv7kfnsu
   localforage: 1.10.0
+  lodash-es: 4.18.1
   p-queue: 9.1.2
   qs: 6.15.0
   react: 18.3.1
@@ -62,6 +65,7 @@ devDependencies:
   '@edenx/app-tools': 1.68.14_35loeflwbr57tkvxnzcqkw2wia
   '@edenx/proxy': 3.1.2
   '@edenx/tsconfig': 1.68.14
+  '@types/lodash-es': 4.17.12
   '@types/node': 20.19.39
   '@types/qs': 6.15.0
   '@types/react': 18.3.28
@@ -6425,6 +6429,16 @@ packages:
       '@types/react': 18.3.28
     dev: false
 
+  /@types/lodash-es/4.17.12:
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
+    dependencies:
+      '@types/lodash': 4.17.24
+    dev: true
+
+  /@types/lodash/4.17.24:
+    resolution: {integrity: sha512-gIW7lQLZbue7lRSWEFql49QJJWThrTFFeIMJdp3eH4tKoxm1OvEPg02rm4wCCSHS0cL3/Fizimb35b7k8atwsQ==}
+    dev: true
+
   /@types/luxon/3.3.8:
     resolution: {integrity: sha512-jYvz8UMLDgy3a5SkGJne8H7VA7zPV2Lwohjx0V8V31+SqAjNmurWMkk9cQhfvlcnXWudBpK9xPM1n4rljOcHYQ==}
     dev: true
@@ -10164,6 +10178,10 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
       p-locate: 6.0.0
+
+  /lodash-es/4.18.1:
+    resolution: {integrity: sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==}
+    dev: false
 
   /lodash.clone/4.5.0:
     resolution: {integrity: sha512-GhrVeweiTD6uTmmn5hV/lzgCQhccwReIVRLHp7LT4SopOjqEZ5BbX8b5WWEtAKasjmy8hR7ZPwsYlxRCku5odg==}

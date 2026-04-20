@@ -1,4 +1,3 @@
-import { countAtom, orderAtom, orderIsDoneAtom, totalAtom } from "@/stores";
 import { IconSave } from "@douyinfe/semi-icons";
 import { IllustrationNoContent } from "@douyinfe/semi-illustrations";
 import { Badge, Button, Empty, Modal, Toast, Upload } from "@douyinfe/semi-ui";
@@ -9,6 +8,7 @@ import { Batch } from "./batch";
 import ImageHistory from "./image-history";
 import ImageList from "./image-list";
 import { PreviewPrint } from "./preview-print";
+import { countAtom, orderIsDoneAtom, subOrderAtom, totalAtom } from "./store";
 import { Uploader } from "./uploader";
 
 export default () => {
@@ -17,7 +17,7 @@ export default () => {
   const total = useAtomValue(totalAtom);
   const count = useAtomValue(countAtom);
   const uploadRef = useRef<Upload>(null);
-  const order = useAtomValue(orderAtom);
+  const order = useAtomValue(subOrderAtom);
   const isDone = useAtomValue(orderIsDoneAtom);
 
   return (

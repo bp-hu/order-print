@@ -1,11 +1,5 @@
 import { updateImageParams } from "@/servers";
-import {
-  imageCacheAtom,
-  orderAtom,
-  orderIsDoneAtom,
-  paperRatioAtom,
-  totalAtom,
-} from "@/stores";
+import { imageCacheAtom } from "@/stores";
 import { http } from "@/utils/http";
 import { useUpdateEffect } from "@auix/utils";
 import {
@@ -15,10 +9,17 @@ import {
   IconPlus,
 } from "@douyinfe/semi-icons";
 import { Button, ImagePreview, Input, Modal, Tooltip } from "@douyinfe/semi-ui";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef, useState } from "react";
 import { ClipPreview } from "./clip-preview";
 import Editor from "./editor";
+import {
+  orderIsDoneAtom,
+  paperRatioAtom,
+  setSubOrderAtom,
+  subOrderAtom,
+  totalAtom,
+} from "./store";
 
 function ImageContainer({
   index,
@@ -27,7 +28,8 @@ function ImageContainer({
   index: number;
   setCount: (count: number) => boolean;
 }) {
-  const [order, setOrder] = useAtom(orderAtom);
+  const order = useAtomValue(subOrderAtom);
+  const setOrder = useSetAtom(setSubOrderAtom);
   const paperRatio = useAtomValue(paperRatioAtom);
   const image = order?.images?.[index];
   const url = image?.url || "";
@@ -68,7 +70,7 @@ function ImageContainer({
     if (tempCount !== count) {
       setTempCount(count);
     }
-  }, [tempCount, count]);
+  }, [count]);
 
   return (
     <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-2xs rounded-md border border-border-0 shadow-md">
@@ -161,7 +163,7 @@ function ImageContainer({
               className="w-[24px] [&>input]:px-3xs"
               value={tempCount}
               onChange={(v) => {
-                setTempCount(v === "" ? undefined : Math.max(1, Number(v)));
+                setTempCount(v ? Number(v) : undefined);
               }}
               onBlur={() => {
                 if (tempCount !== undefined) {
@@ -202,7 +204,8 @@ export default ({
   onVisibleChange: (v: boolean) => void;
 }) => {
   const total = useAtomValue(totalAtom);
-  const [order, setOrder] = useAtom(orderAtom);
+  const order = useAtomValue(subOrderAtom);
+  const setOrder = useSetAtom(setSubOrderAtom);
 
   return (
     <>

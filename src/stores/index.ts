@@ -28,8 +28,16 @@ export const showPrintTipAtom = atom(
   },
 );
 
-export const orderAtom = atom<IOrder | undefined>(undefined);
+export const orderAtom = atom<
+  | {
+      orders: IOrder[];
+      order_number: string;
+    }
+  | undefined
+>(undefined);
+
 export const orderLoadingAtom = atom<boolean>(false);
+
 export const refreshOrderAtom = atom(null, async (get, set) => {
   set(orderLoadingAtom, true);
   try {
@@ -41,73 +49,57 @@ export const refreshOrderAtom = atom(null, async (get, set) => {
         withCredentials: false,
       },
     );
-    const nextOrder = res
-      ? {
-          ...res,
-          images: (res.images || []).map((id: string) => ({
-            id,
-            url: `/api/v1/images/${orderId}/${id}`,
-          })),
+    let nextOrders = (Array.isArray(res) ? res : [res]).filter(Boolean);
+    nextOrders = nextOrders.map((order) => ({
+      ...order,
+      images: (order.images || []).map((id: string) => ({
+        id,
+        url: `/api/v1/images/${order.order_number}/${id}`,
+      })),
+    }));
+
+    await Promise.all(
+      nextOrders.map(async (order) => {
+        const imageIds = (order.images || []).map((item) => item.id);
+        if (imageIds.length) {
+          const imageInfoList = await getImageInfoList(
+            order.order_number,
+            imageIds,
+          );
+          const imageInfos = (imageInfoList?.images || []).reduce(
+            (acc: any, cur: any) => {
+              acc[cur.id] = cur;
+              return acc;
+            },
+            {} as Record<string, any>,
+          );
+          const imageCache = get(imageCacheAtom);
+          order.images = (order.images || []).map((image: any) => ({
+            ...image,
+            ...imageInfos[image.id],
+            preview_url:
+              imageCache.find((v) => v.key === image.id)?.url || image.url,
+            edited_params: {
+              count: 1,
+              clipType: "auto",
+              layout: "horizontal",
+              autoToning: false,
+              rotate: undefined,
+              ...(imageInfos[image.id]?.edited_params || {}),
+            },
+          }));
         }
-      : undefined;
+      }),
+    );
 
-    const imageIds = (res.images || []).map((id: string) => id);
-    if (nextOrder && imageIds.length) {
-      const imageInfoList = await getImageInfoList(orderId, imageIds);
-      const imageInfos = (imageInfoList?.images || []).reduce(
-        (acc: any, cur: any) => {
-          acc[cur.id] = cur;
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
-      const imageCache = get(imageCacheAtom);
-      nextOrder.images = (nextOrder.images || []).map((image: any) => ({
-        ...image,
-        ...imageInfos[image.id],
-        preview_url:
-          imageCache.find((v) => v.key === image.id)?.url || image.url,
-        edited_params: {
-          count: 1,
-          clipType: "auto",
-          layout: "horizontal",
-          autoToning: false,
-          rotate: undefined,
-          ...(imageInfos[image.id]?.edited_params || {}),
-        },
-      }));
-    }
-
-    set(orderAtom, nextOrder);
+    set(orderAtom, {
+      orders: nextOrders,
+      order_number: orderId,
+    });
   } finally {
     set(orderLoadingAtom, false);
   }
 });
-export const paperRatioAtom = atom<number>((get) => {
-  const order = get(orderAtom);
-  const photoSize = order
-    ? {
-        w: order.paper_w || 0,
-        h: order.paper_h || 0,
-      }
-    : undefined;
-  return photoSize ? photoSize.w / photoSize.h : 0.4;
-});
-export const orderIsDoneAtom = atom<boolean>((get) => {
-  const order = get(orderAtom);
-  return order?.customer_status === "照片已上传";
-});
-export const totalAtom = atom<number>((get) => {
-  const order = get(orderAtom);
-  return order?.max_photo_count || 0;
-});
-export const countAtom = atom<number>(
-  (get) =>
-    get(orderAtom)?.images?.reduce(
-      (acc, cur) => acc + cur.edited_params?.count,
-      0,
-    ) || 0,
-);
 
 export const imageCacheAtom = atom(
   [] as {

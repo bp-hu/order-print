@@ -1,5 +1,5 @@
 import { deleteImageList, updateImageListParams } from "@/servers";
-import { imageCacheAtom, orderAtom } from "@/stores";
+import { imageCacheAtom } from "@/stores";
 import { ClipType, EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
@@ -11,14 +11,16 @@ import {
   IconImage,
 } from "@douyinfe/semi-icons";
 import { Button, Modal, SideSheet, Toast } from "@douyinfe/semi-ui";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useState } from "react";
 import { CountEditor } from "./count-editor";
+import { setSubOrderAtom, subOrderAtom } from "./store";
 
 export function Batch() {
   const [visible, setVisible] = useState(false);
   const [countVisible, setCountVisible] = useState(false);
-  const [order, setOrder] = useAtom(orderAtom);
+  const order = useAtomValue(subOrderAtom);
+  const setOrder = useSetAtom(setSubOrderAtom);
   const imageIds = (order?.images || [])?.map((v) => v.id || "");
   const setImageCache = useSetAtom(imageCacheAtom);
 

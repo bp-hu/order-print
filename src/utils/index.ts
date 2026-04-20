@@ -163,11 +163,11 @@ export function getClipSize({
 
   if (paperRatio <= imageRatio) {
     imageWidth =
-      clipType === "around" ? frameWidth - 0.04 * maxFrameLength : frameWidth;
+      clipType === "around" ? frameWidth - 0.08 * maxFrameLength : frameWidth;
     imageHeight = (imageWidth / width) * height;
   } else {
     imageHeight =
-      clipType === "around" ? frameHeight - 0.04 * maxFrameLength : frameHeight;
+      clipType === "around" ? frameHeight - 0.08 * maxFrameLength : frameHeight;
     imageWidth = (imageHeight / height) * width;
   }
 
@@ -212,8 +212,8 @@ export function getPrintParams({
   });
 
   // 根据纸张尺寸等比计算照片尺寸和留白尺寸
-  const imageWidth = (paperWidth / frameWidth) * zoomImageWidth;
-  const imageHeight = (paperHeight / frameHeight) * zoomImageHeight;
+  let imageWidth = (paperWidth / frameWidth) * zoomImageWidth;
+  let imageHeight = (paperHeight / frameHeight) * zoomImageHeight;
   const blankWidth = paperWidth - imageWidth;
   const blankHeight = paperHeight - imageHeight;
 
@@ -292,14 +292,17 @@ export function getPrintParams({
       : paperRatioProp;
 
   const isAround = clipType === "around";
-  const maxImageLength = Math.max(imageWidth, imageHeight);
-  const blankX = isAround ? 0.04 * maxImageLength : 0;
-  const blankY = isAround ? 0.04 * maxImageLength : 0;
+  // 四周留白：留页面的 4% 作为留白区域
+  const maxPaperLength = Math.max(paperWidth, paperHeight);
+  const blankX = isAround ? 0.04 * maxPaperLength : 0;
+  const blankY = isAround ? 0.04 * maxPaperLength : 0;
 
   // 高度裁剪
   if (imageRatio <= paperRatio) {
-    const clipTop = clipPosPercent[0] * (paperHeight - blankY);
-    const clipHeight = clipSizePercent[1] * (paperHeight - blankY);
+    // 智能裁剪的 imageHeight 需要基于图片尺寸重新计算，因为 getClipSize 返回的是裁剪后的尺寸
+    imageHeight = (imageWidth / zoomImageWidth) * zoomImageHeight;
+    const clipTop = clipPosPercent[0] * imageHeight;
+    const clipHeight = clipSizePercent[1] * imageHeight;
 
     return {
       start_x: 0,
@@ -315,8 +318,10 @@ export function getPrintParams({
     };
   } else {
     // 宽度裁剪
-    const clipLeft = clipPosPercent[1] * (paperWidth - blankX);
-    const clipWidth = clipSizePercent[0] * (paperWidth - blankX);
+    // 智能裁剪的 imageWidth 需要基于图片尺寸重新计算，因为 getClipSize 返回的是裁剪后的尺寸
+    imageWidth = (imageHeight / zoomImageHeight) * zoomImageWidth;
+    const clipLeft = clipPosPercent[1] * imageWidth;
+    const clipWidth = clipSizePercent[0] * imageWidth;
 
     return {
       start_x: clipLeft,

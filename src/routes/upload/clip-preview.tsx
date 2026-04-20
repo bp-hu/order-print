@@ -179,13 +179,12 @@ export const ClipPreview = ({
             : children) ??
             (["auto", "around"].includes(clipType) ? (
               <ClipOverlay
-                clipType={clipType}
+                frameSize={[clipSize.imageWidth, clipSize.imageHeight]}
                 layout={layout}
                 paperRatio={paperRatio}
-                imageRatio={imageSize[0] / imageSize[1]}
+                imageSize={imageSize}
                 clipPosPercent={clipPosPercent || [0, 0]}
                 clipSizePercent={clipSizePercent || [0, 0]}
-                containerSize={size}
               />
             ) : null)}
         </div>

@@ -1,8 +1,8 @@
-import { orderAtom, totalAtom } from "@/stores";
 import { IconMinus, IconPlus } from "@douyinfe/semi-icons";
 import { Button, Input, Modal, SideSheet } from "@douyinfe/semi-ui";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { subOrderAtom, totalAtom } from "./store";
 
 export function CountEditor({
   visible,
@@ -15,7 +15,7 @@ export function CountEditor({
 }) {
   const [count, setCount] = useState<number | undefined>(1);
   const total = useAtomValue(totalAtom);
-  const order = useAtomValue(orderAtom);
+  const order = useAtomValue(subOrderAtom);
 
   return (
     <SideSheet

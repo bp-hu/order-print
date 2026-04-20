@@ -1,5 +1,5 @@
 import { updateImageParams } from "@/servers";
-import { orderAtom, paperRatioAtom } from "@/stores";
+
 import { EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
@@ -15,10 +15,11 @@ import {
   SideSheet,
   Typography,
 } from "@douyinfe/semi-ui";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useState } from "react";
 import { ClipPreview } from "../clip-preview";
 import { PreviewPrint } from "../preview-print";
+import { paperRatioAtom, setSubOrderAtom, subOrderAtom } from "../store";
 import { Clip } from "./clip";
 
 const { Text } = Typography;
@@ -32,7 +33,8 @@ function Editor({
   setVisible: (visible: boolean) => void;
   index: number;
 }) {
-  const [order, setOrder] = useAtom(orderAtom);
+  const order = useAtomValue(subOrderAtom);
+  const setOrder = useSetAtom(setSubOrderAtom);
   const paperRatio = useAtomValue(paperRatioAtom);
   const image = order?.images[index];
   const src = image?.url || "";

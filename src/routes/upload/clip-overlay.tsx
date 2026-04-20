@@ -1,48 +1,51 @@
-import { ClipLayout, ClipType } from "@/typings";
-import { getPaperRatioByLayout } from "@/utils";
+import { ClipLayout } from "@/typings";
+import { getClipParams, getPaperRatioByLayout } from "@/utils";
 import { cn } from "@auix/utils";
 
 export function ClipOverlay({
   className,
   layout,
   paperRatio,
-  imageRatio,
+  imageSize,
   clipPosPercent,
   clipSizePercent,
-  containerSize,
-  clipType,
+  frameSize,
 }: {
   className?: string;
   paperRatio: number;
-  imageRatio: number;
+  imageSize: [number, number];
   layout: ClipLayout;
   clipPosPercent: [number, number];
   clipSizePercent: [number, number];
-  containerSize: [number, number];
-  clipType: ClipType;
+  frameSize: [number, number];
 }) {
-  const [_containerHeight, _containerWidth] = containerSize;
-  const maxContainerLength = Math.max(_containerHeight, _containerWidth);
-  const containerHeight =
-    clipType === "around"
-      ? _containerHeight - 0.04 * maxContainerLength
-      : _containerHeight;
-  const containerWidth =
-    clipType === "around"
-      ? _containerWidth - 0.04 * maxContainerLength
-      : _containerWidth;
+  // const maxContainerLength = Math.max(_containerHeight, _containerWidth);
+  // const containerHeight =
+  //   clipType === "around"
+  //     ? _containerHeight - 0.04 * maxContainerLength
+  //     : _containerHeight;
+  // const containerWidth =
+  //   clipType === "around"
+  //     ? _containerWidth - 0.04 * maxContainerLength
+  //     : _containerWidth;
+  const [frameWidth, frameHeight] = frameSize;
   const clipRatio = getPaperRatioByLayout({
     layout,
     paperRatio,
   });
+  const imageRatio = imageSize[0] / imageSize[1];
   const isVertical = imageRatio <= clipRatio;
+  const { croppingWidth, croppingHeight } = getClipParams({
+    layout,
+    paperRatio,
+    frameSize,
+    imageSize,
+  });
 
-  const clipTop = clipPosPercent[1] * containerHeight;
-  const clipHeight =
-    clipSizePercent[1] * containerHeight - 0.04 * maxContainerLength;
-  const clipLeft = clipPosPercent[0] * containerWidth;
-  const clipWidth =
-    clipSizePercent[0] * containerWidth - 0.04 * maxContainerLength;
+  const clipTop = clipPosPercent[1] * frameHeight;
+  const clipHeight = clipSizePercent[1] * frameHeight;
+  const clipLeft = clipPosPercent[0] * frameWidth;
+  const clipWidth = clipSizePercent[0] * frameWidth;
 
   return (
     <div
@@ -76,8 +79,8 @@ export function ClipOverlay({
         <div
           style={
             {
-              "--clip-height": `${clipHeight}px`,
-              "--clip-width": `${clipWidth}px`,
+              "--clip-height": `${croppingHeight}px`,
+              "--clip-width": `${croppingWidth}px`,
             } as any
           }
           className={cn("relative", {
@@ -110,8 +113,8 @@ export function ClipOverlay({
       <div
         style={
           {
-            "--mask-height": `${containerHeight - clipTop - clipHeight}px`,
-            "--mask-width": `${containerWidth - clipLeft - clipWidth}px`,
+            "--mask-height": `${frameHeight - clipTop - clipHeight}px`,
+            "--mask-width": `${frameWidth - clipLeft - clipWidth}px`,
           } as any
         }
         className={cn("absolute bg-[#ffffff80]", {
