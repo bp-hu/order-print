@@ -1,4 +1,4 @@
-import { ClipLayout } from "@/typings";
+import { ClipLayout, ClipType } from "@/typings";
 import { getClipParams } from "@/utils";
 import { cn, useDebounceFn, useUpdateEffect } from "@auix/utils";
 import { CSSProperties, useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ export function Clip({
   imageSize,
   disabled,
   frameSize,
+  clipType,
 }: {
   className?: string;
   style?: CSSProperties;
@@ -23,6 +24,7 @@ export function Clip({
   disabled?: boolean;
   defaultClipPosPercent?: [number, number];
   frameSize: [number, number];
+  clipType: ClipType;
   onMove: (props: {
     clipTopPercent: number;
     clipLeftPercent: number;
@@ -75,6 +77,8 @@ export function Clip({
     });
   }, [layout]);
 
+  const blankSize = Math.max(frameWidth, frameHeight) * 0.04;
+
   return (
     <div
       style={style}
@@ -121,11 +125,14 @@ export function Clip({
             {
               "--clip-height": `${croppingHeight}px`,
               "--clip-width": `${croppingWidth}px`,
+              "--blank-offset": `${-blankSize}px`,
+              "--blank-size": `${blankSize}px`,
             } as any
           }
           className={cn("relative", {
             "w-full h-(--clip-height)": isVertical,
             "w-(--clip-width) h-full": !isVertical,
+            "canon-clip-around": clipType === "around",
           })}
         >
           {Array.from({ length: 2 }).map((_, index) => (

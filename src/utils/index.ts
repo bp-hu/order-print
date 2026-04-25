@@ -163,11 +163,11 @@ export function getClipSize({
 
   if (paperRatio <= imageRatio) {
     imageWidth =
-      clipType === "around" ? frameWidth - 0.08 * maxFrameLength : frameWidth;
+      clipType === "around" ? frameWidth - 0.1 * maxFrameLength : frameWidth;
     imageHeight = (imageWidth / width) * height;
   } else {
     imageHeight =
-      clipType === "around" ? frameHeight - 0.08 * maxFrameLength : frameHeight;
+      clipType === "around" ? frameHeight - 0.1 * maxFrameLength : frameHeight;
     imageWidth = (imageHeight / height) * width;
   }
 

@@ -112,3 +112,9 @@ export const imageCacheAtom = atom(
     localforage.setItem("imageCache", finalV);
   },
 );
+
+export const isEditedAtom = atom(false, (get, set, v) => {
+  const finalV = typeof v === "function" ? v(get(isEditedAtom)) : v;
+  set(isEditedAtom, finalV);
+  localforage.setItem("isEdited", finalV);
+});

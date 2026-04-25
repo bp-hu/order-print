@@ -117,9 +117,10 @@ export const ClipPreview = ({
         className={cn(
           "relative bg-white flex border border-border-1 overflow-hidden w-(--width) h-(--height)",
           {
-            "items-center justify-center": ["auto", "around"].includes(
-              clipType,
-            ),
+            "items-center justify-center bg-transparent border-none": [
+              "auto",
+              "around",
+            ].includes(clipType),
             "items-center": clipType === "margin",
             "justify-center": clipType === "margin",
           },

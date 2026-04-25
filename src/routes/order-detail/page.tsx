@@ -6,10 +6,17 @@ import {
   showPrintTipAtom,
 } from "@/stores";
 import { IconFilledArrowUp, IconUpload } from "@douyinfe/semi-icons";
-import { Button, Divider, Modal, Toast, Typography } from "@douyinfe/semi-ui";
+import {
+  Button,
+  Checkbox,
+  Divider,
+  Modal,
+  Toast,
+  Typography,
+} from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 
 const { Text } = Typography;
 
@@ -37,6 +44,7 @@ export default () => {
     () => order?.orders.every((item) => item.customer_status === "照片已上传"),
     [order],
   );
+  const isConfirmedRef = useRef<boolean>(false);
 
   return (
     <>
@@ -102,17 +110,22 @@ export default () => {
               </div>
               <div className="ml-auto flex flex-col gap-xs">
                 {item.customer_status === "照片已上传" ? (
-                  <Button
-                    size="small"
-                    theme="solid"
-                    onClick={() => {
-                      navigate(
-                        `/upload?id=${order?.order_number}&subOrderId=${item?.order_number}`,
-                      );
-                    }}
-                  >
-                    查看设计
-                  </Button>
+                  <div className="flex flex-col gap-md">
+                    <Button
+                      size="small"
+                      theme="solid"
+                      onClick={() => {
+                        navigate(
+                          `/upload?id=${order?.order_number}&subOrderId=${item?.order_number}`,
+                        );
+                      }}
+                    >
+                      查看设计
+                    </Button>
+                    <span className="text-primary text-center font-medium">
+                      提交成功
+                    </span>
+                  </div>
                 ) : (
                   <Button
                     size="small"
@@ -155,9 +168,48 @@ export default () => {
                   });
                   return;
                 }
-                await customerConfirm(order?.order_number || "");
-                refreshOrder();
-                Toast.success("提交成功");
+
+                Modal.confirm({
+                  title: "确认提交印刷吗？",
+                  width: "100vw",
+                  content: (
+                    <div className="flex flex-col gap-md">
+                      提交前请您仔细确认下方内容!
+                      <ul className="flex flex-col gap-xs">
+                        <li>
+                          ●本品为定制类商品，提交订单后即刻进入生产流程（不能修改），非生产质量问题不退不换。
+                        </li>
+                        <li>
+                          ●已确认照片均已按要求调整了裁切框（未裁切到重要信息位置且预留2mm误差范围）。
+                        </li>
+                        <li>
+                          ●已确认所有设计均已调整完毕（包含但不仅限于重复照片、重复设计、裁切框、留白等信息）。
+                        </li>
+                        <li>
+                          ●已确认模糊不清（包含但不仅限于分辨率低，对焦不准）的照片可正常印制。
+                        </li>
+                        <li>
+                          ●提交照片后，请保持电话畅通，如遇快递停发等因素，佳能冲印团队将及时联系您。
+                        </li>
+                      </ul>
+                      <Checkbox
+                        onChange={(e) => {
+                          isConfirmedRef.current = e.target.checked ?? false;
+                        }}
+                      >
+                        我已阅读并确认以上的内容
+                      </Checkbox>
+                    </div>
+                  ),
+                  async onOk() {
+                    if (!isConfirmedRef.current) {
+                      return;
+                    }
+                    await customerConfirm(order?.order_number || "");
+                    refreshOrder();
+                    Toast.success("提交成功");
+                  },
+                });
               }}
             >
               提交印刷

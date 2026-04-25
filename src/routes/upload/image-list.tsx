@@ -73,7 +73,7 @@ function ImageContainer({
   }, [count]);
 
   return (
-    <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-2xs rounded-md border border-border-0 shadow-md">
+    <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-4xs rounded-md border border-border-0 shadow-md">
       <div className="relative">
         <ClipPreview
           src={image?.preview_url || url}
@@ -215,7 +215,7 @@ export default ({
         onVisibleChange={onVisibleChange}
         disableDownload
       />
-      <div className="flex flex-wrap gap-lg">
+      <div className="flex flex-wrap gap-x-4xs gap-y-lg">
         {order?.images.map((_, index) => (
           <ImageContainer
             key={index}

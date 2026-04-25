@@ -1,9 +1,10 @@
 import { updateImageParams } from "@/servers";
-
+import { isEditedAtom } from "@/stores";
 import { EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
 import {
+  IconClose,
   IconColorPalette,
   IconEyeOpened,
   IconImage,
@@ -21,6 +22,7 @@ import { ClipPreview } from "../clip-preview";
 import { PreviewPrint } from "../preview-print";
 import { paperRatioAtom, setSubOrderAtom, subOrderAtom } from "../store";
 import { Clip } from "./clip";
+import "./style.css";
 
 const { Text } = Typography;
 
@@ -110,51 +112,59 @@ function Editor({
       height="80%"
     >
       <div className="flex flex-col items-center gap-md">
-        <ClipPreview
-          paperRatio={paperRatio}
-          clipType={editParams.clipType}
-          layout={editParams.layout}
-          src={image?.preview_url || src}
-          imageId={image?.id || ""}
-          ready={visible}
-          rotate={editParams.rotate}
-          clipPosPercent={[
-            editParams.clipLeftPercent || 0,
-            editParams.clipTopPercent || 0,
-          ]}
-          clipSizePercent={[
-            editParams.clipWidthPercent || 0,
-            editParams.clipHeightPercent || 0,
-          ]}
-          imageSize={[
-            editParams.naturalWidth || 0,
-            editParams.naturalHeight || 0,
-          ]}
-        >
-          {["auto", "around"].includes(editParams.clipType)
-            ? ({ frameWidth, frameHeight, paperRatio, layout }) => (
-                <Clip
-                  frameSize={[frameWidth, frameHeight]}
-                  layout={layout}
-                  paperRatio={paperRatio}
-                  defaultClipPosPercent={[
-                    editParams.clipLeftPercent || 0,
-                    editParams.clipTopPercent || 0,
-                  ]}
-                  imageSize={[
-                    editParams.naturalWidth || 0,
-                    editParams.naturalHeight || 0,
-                  ]}
-                  onMove={(pos) =>
-                    setEditParams({
-                      ...editParams,
-                      ...pos,
-                    })
-                  }
-                />
-              )
-            : null}
-        </ClipPreview>
+        <div className="relative">
+          <IconClose
+            className="absolute top-4 right-4 cursor-pointer text-text-1"
+            onClick={() => setVisible(false)}
+          />
+          <ClipPreview
+            paperRatio={paperRatio}
+            clipType={editParams.clipType}
+            layout={editParams.layout}
+            src={image?.preview_url || src}
+            imageId={image?.id || ""}
+            ready={visible}
+            rotate={editParams.rotate}
+            clipPosPercent={[
+              editParams.clipLeftPercent || 0,
+              editParams.clipTopPercent || 0,
+            ]}
+            clipSizePercent={[
+              editParams.clipWidthPercent || 0,
+              editParams.clipHeightPercent || 0,
+            ]}
+            imageSize={[
+              editParams.naturalWidth || 0,
+              editParams.naturalHeight || 0,
+            ]}
+          >
+            {["auto", "around"].includes(editParams.clipType)
+              ? ({ frameWidth, frameHeight, paperRatio, layout }) => (
+                  <Clip
+                    frameSize={[frameWidth, frameHeight]}
+                    layout={layout}
+                    paperRatio={paperRatio}
+                    clipType={editParams.clipType}
+                    defaultClipPosPercent={[
+                      editParams.clipLeftPercent || 0,
+                      editParams.clipTopPercent || 0,
+                    ]}
+                    imageSize={[
+                      editParams.naturalWidth || 0,
+                      editParams.naturalHeight || 0,
+                    ]}
+                    onMove={(pos) =>
+                      setEditParams({
+                        ...editParams,
+                        ...pos,
+                      })
+                    }
+                  />
+                )
+              : null}
+          </ClipPreview>
+        </div>
+
         <div className="flex flex-col gap-md">
           <div className="grid grid-cols-3">
             {/* <div className="flex items-center gap-xs">
@@ -205,16 +215,16 @@ function Editor({
                 onClick: () =>
                   setEditParams({ ...editParams, clipType: "auto" }),
               },
-              {
-                icon: <IconColorPalette />,
-                label: "四周留白",
-                active: editParams.clipType === "around",
-                onClick: () =>
-                  setEditParams({ ...editParams, clipType: "around" }),
-              },
               ...(["1英寸", "2英寸"].includes(order?.photo_size || "")
                 ? []
                 : [
+                    {
+                      icon: <IconColorPalette />,
+                      label: "四周留白",
+                      active: editParams.clipType === "around",
+                      onClick: () =>
+                        setEditParams({ ...editParams, clipType: "around" }),
+                    },
                     {
                       icon: <IconImage />,
                       label: "两边留白",
@@ -247,6 +257,7 @@ function Editor({
           </div>
         </div>
       </div>
+
       {visible && previewVisible ? (
         <PreviewPrint
           showTrigger={false}
@@ -263,12 +274,16 @@ function Editor({
 
 export default ({ index }: { index: number }) => {
   const [visible, setVisible] = useState<boolean>(false);
+  const setIsEdited = useSetAtom(isEditedAtom);
 
   return (
     <>
       <Text
         className="text-blue-500 typo-sm ml-lg"
-        onClick={() => setVisible(true)}
+        onClick={() => {
+          setVisible(true);
+          setIsEdited(true);
+        }}
       >
         编辑/预览
       </Text>

@@ -39,8 +39,9 @@ export function Filter({
   }, [value]);
 
   return (
-    <div className="flex items-center gap-md">
+    <div className="flex flex-wrap items-center gap-md">
       <Input
+        className="max-w-[200px] min-w-[120px]"
         showClear
         placeholder="请输入订单号搜索"
         value={tempValue.searchKey}

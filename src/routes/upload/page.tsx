@@ -1,8 +1,17 @@
-import { IconSave } from "@douyinfe/semi-icons";
+import { isEditedAtom, showPrintTipAtom } from "@/stores";
+import { IconAlertTriangle, IconSave } from "@douyinfe/semi-icons";
 import { IllustrationNoContent } from "@douyinfe/semi-illustrations";
-import { Badge, Button, Empty, Modal, Toast, Upload } from "@douyinfe/semi-ui";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Empty,
+  Modal,
+  Toast,
+  Upload,
+} from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
 import { Batch } from "./batch";
 import ImageHistory from "./image-history";
@@ -19,6 +28,14 @@ export default () => {
   const uploadRef = useRef<Upload>(null);
   const order = useAtomValue(subOrderAtom);
   const isDone = useAtomValue(orderIsDoneAtom);
+  const [isEdited, setIsEdited] = useAtom(isEditedAtom);
+  const setShowPrintTip = useSetAtom(showPrintTipAtom);
+
+  function onSave() {
+    navigate("/order-detail");
+    setShowPrintTip(true);
+    Toast.success("保存成功");
+  }
 
   return (
     <>
@@ -55,7 +72,7 @@ export default () => {
           <>
             <Batch />
             <div className="mt-xs text-danger typo-sm">
-              上传照片时，按住 Shift 或 Command 选择多张照片。
+              上传照片时，按住 Ctrl 或 Command 选择多张照片。
               虚线框为照片打印区域，不满意可点击“编辑”调整
             </div>
           </>
@@ -100,26 +117,52 @@ export default () => {
               theme="solid"
               className="h-full flex-1 p-md border-l border-border-0 flex items-center justify-center gap-3xs rounded-full"
               onClick={() => {
-                if (count < total) {
-                  Modal.error({
-                    width: "100vw",
-                    closable: false,
-                    content: `照片总数不足 ${total} 张！确认保存吗？`,
-                    onOk: () => {
-                      navigate("/order-detail");
-                      Toast.success("保存成功");
-                    },
-                  });
-                } else {
+                if (!isEdited) {
                   Modal.confirm({
                     width: "100vw",
                     closable: false,
-                    content: "确认保存设计吗？",
-                    onOk: () => {
-                      navigate("/order-detail");
-                      Toast.success("保存成功");
+                    title: "重要提示",
+                    icon: (
+                      <IconAlertTriangle
+                        style={{ color: "var(--semi-color-danger)" }}
+                      />
+                    ),
+                    cancelButtonProps: {
+                      style: {
+                        display: "none",
+                      },
                     },
+                    content: (
+                      <div className="flex flex-col gap-md">
+                        预览效果为最终出片效果哦，您已调整好裁剪位置了吗？（请您手动调整照片画面的裁切区域，以免主体画面被过度裁切，预览效果为最终出效果）
+                        <div>
+                          <Checkbox
+                            onChange={(e) => {
+                              setIsEdited(e.target.checked);
+                            }}
+                          >
+                            请确认您已阅读并悉知以上内容
+                          </Checkbox>
+                        </div>
+                      </div>
+                    ),
                   });
+                } else {
+                  if (count < total) {
+                    Modal.error({
+                      width: "100vw",
+                      closable: false,
+                      content: `照片总数不足 ${total} 张！确认保存吗？`,
+                      onOk: onSave,
+                    });
+                  } else {
+                    Modal.confirm({
+                      width: "100vw",
+                      closable: false,
+                      content: "确认保存设计吗？",
+                      onOk: onSave,
+                    });
+                  }
                 }
               }}
             >
