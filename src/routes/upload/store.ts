@@ -27,6 +27,17 @@ export const setSubOrderAtom = atom(null, (get, set, v: any) => {
   }
 });
 
+export const paperSizeAtom = atom<[number, number]>((get) => {
+  const order = get(subOrderAtom);
+  const photoSize = order
+    ? {
+        w: order.paper_w || 0,
+        h: order.paper_h || 0,
+      }
+    : undefined;
+  return [photoSize?.w || 0, photoSize?.h || 0];
+});
+
 export const paperRatioAtom = atom<number>((get) => {
   const order = get(subOrderAtom);
   const photoSize = order

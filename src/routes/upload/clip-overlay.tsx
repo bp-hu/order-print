@@ -19,15 +19,6 @@ export function ClipOverlay({
   clipSizePercent: [number, number];
   frameSize: [number, number];
 }) {
-  // const maxContainerLength = Math.max(_containerHeight, _containerWidth);
-  // const containerHeight =
-  //   clipType === "around"
-  //     ? _containerHeight - 0.04 * maxContainerLength
-  //     : _containerHeight;
-  // const containerWidth =
-  //   clipType === "around"
-  //     ? _containerWidth - 0.04 * maxContainerLength
-  //     : _containerWidth;
   const [frameWidth, frameHeight] = frameSize;
   const clipRatio = getPaperRatioByLayout({
     layout,

@@ -159,15 +159,12 @@ export function getClipSize({
     (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1)
       ? 1 / paperRatioProp
       : paperRatioProp;
-  const maxFrameLength = Math.max(frameWidth, frameHeight);
 
   if (paperRatio <= imageRatio) {
-    imageWidth =
-      clipType === "around" ? frameWidth - 0.1 * maxFrameLength : frameWidth;
+    imageWidth = frameWidth;
     imageHeight = (imageWidth / width) * height;
   } else {
-    imageHeight =
-      clipType === "around" ? frameHeight - 0.1 * maxFrameLength : frameHeight;
+    imageHeight = frameHeight;
     imageWidth = (imageHeight / height) * width;
   }
 
@@ -195,8 +192,15 @@ export function getPrintParams({
   clipPosPercent: [number, number];
   clipSizePercent: [number, number];
 }) {
-  const [paperWidth, paperHeight] = paperSize;
-  const paperRatioProp = paperSize[0] / paperSize[1];
+  const isAround = clipType === "around";
+  // 四周留白：留页面的 4% 作为留白区域
+  const aroundBlankLength = Math.max(...paperSize) * 0.08;
+  // 四周留白的 paperRatio 基于留白后的纸张计算
+  const [paperWidth, paperHeight] = isAround
+    ? [paperSize[0] - aroundBlankLength, paperSize[1] - aroundBlankLength]
+    : paperSize;
+
+  const paperRatioProp = paperWidth / paperHeight;
   const imageRatio = imageSize[0] / imageSize[1];
   const {
     frameHeight,
@@ -286,21 +290,17 @@ export function getPrintParams({
   /** 智能裁剪 */
   const isHorizontal = props.layout === "horizontal";
   const isVertical = !isHorizontal;
-  const paperRatio =
-    (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1)
-      ? 1 / paperRatioProp
-      : paperRatioProp;
+  const reverse =
+    (isHorizontal && paperRatioProp < 1) || (isVertical && paperRatioProp >= 1);
+  const paperRatio = reverse ? 1 / paperRatioProp : paperRatioProp;
+  const blankX = isAround ? aroundBlankLength / 2 : 0;
+  const blankY = isAround ? aroundBlankLength / 2 : 0;
 
-  const isAround = clipType === "around";
-  // 四周留白：留页面的 4% 作为留白区域
-  const maxPaperLength = Math.max(paperWidth, paperHeight);
-  const blankX = isAround ? 0.04 * maxPaperLength : 0;
-  const blankY = isAround ? 0.04 * maxPaperLength : 0;
-
-  // 高度裁剪
+  // 图片更高，高度裁剪
   if (imageRatio <= paperRatio) {
-    // 智能裁剪的 imageHeight 需要基于图片尺寸重新计算，因为 getClipSize 返回的是裁剪后的尺寸
-    imageHeight = (imageWidth / zoomImageWidth) * zoomImageHeight;
+    imageWidth = reverse ? paperHeight : paperWidth;
+    imageHeight = imageWidth / imageRatio;
+
     const clipTop = clipPosPercent[0] * imageHeight;
     const clipHeight = clipSizePercent[1] * imageHeight;
 
@@ -317,9 +317,10 @@ export function getPrintParams({
       photo_h: imageHeight,
     };
   } else {
-    // 宽度裁剪
-    // 智能裁剪的 imageWidth 需要基于图片尺寸重新计算，因为 getClipSize 返回的是裁剪后的尺寸
-    imageWidth = (imageHeight / zoomImageHeight) * zoomImageWidth;
+    // 图片更宽，宽度裁剪
+    imageHeight = reverse ? paperWidth : paperHeight;
+    imageWidth = imageHeight * imageRatio;
+
     const clipLeft = clipPosPercent[1] * imageWidth;
     const clipWidth = clipSizePercent[0] * imageWidth;
 

@@ -20,7 +20,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useState } from "react";
 import { ClipPreview } from "../clip-preview";
 import { PreviewPrint } from "../preview-print";
-import { paperRatioAtom, setSubOrderAtom, subOrderAtom } from "../store";
+import { paperSizeAtom, setSubOrderAtom, subOrderAtom } from "../store";
 import { Clip } from "./clip";
 import "./style.css";
 
@@ -37,7 +37,7 @@ function Editor({
 }) {
   const order = useAtomValue(subOrderAtom);
   const setOrder = useSetAtom(setSubOrderAtom);
-  const paperRatio = useAtomValue(paperRatioAtom);
+  const paperSize = useAtomValue(paperSizeAtom);
   const image = order?.images[index];
   const src = image?.url || "";
   const [editParams, setEditParams] = useState(
@@ -118,7 +118,7 @@ function Editor({
             onClick={() => setVisible(false)}
           />
           <ClipPreview
-            paperRatio={paperRatio}
+            paperSize={paperSize}
             clipType={editParams.clipType}
             layout={editParams.layout}
             src={image?.preview_url || src}

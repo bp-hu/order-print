@@ -9,7 +9,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { ClipOverlay } from "./clip-overlay";
 
 export const ClipPreview = ({
-  paperRatio,
+  paperSize,
   clipType,
   layout = "horizontal",
   src,
@@ -24,7 +24,7 @@ export const ClipPreview = ({
   clipPosPercent,
   clipSizePercent,
 }: {
-  paperRatio: number;
+  paperSize: [number, number];
   src: string;
   imageId?: string;
   clipType?: ClipType;
@@ -60,6 +60,14 @@ export const ClipPreview = ({
   });
   const [inited, setInited] = useState(false);
   const [imageCache, setImageCache] = useAtom(imageCacheAtom);
+
+  // 四周留白：留页面的 4% 作为留白区域
+  const aroundBlankLength = Math.max(...paperSize) * 0.08;
+  // 四周留白的 paperRatio 基于留白后的纸张尺寸计算
+  const paperRatio =
+    clipType === "around"
+      ? (paperSize[0] - aroundBlankLength) / (paperSize[1] - aroundBlankLength)
+      : paperSize[0] / paperSize[1];
 
   useEffect(() => {
     if (ready && layout) {

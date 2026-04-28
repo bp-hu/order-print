@@ -15,7 +15,7 @@ import { ClipPreview } from "./clip-preview";
 import Editor from "./editor";
 import {
   orderIsDoneAtom,
-  paperRatioAtom,
+  paperSizeAtom,
   setSubOrderAtom,
   subOrderAtom,
   totalAtom,
@@ -30,7 +30,7 @@ function ImageContainer({
 }) {
   const order = useAtomValue(subOrderAtom);
   const setOrder = useSetAtom(setSubOrderAtom);
-  const paperRatio = useAtomValue(paperRatioAtom);
+  const paperSize = useAtomValue(paperSizeAtom);
   const image = order?.images?.[index];
   const url = image?.url || "";
   const {
@@ -81,7 +81,7 @@ function ImageContainer({
           layout={layout}
           clipType={clipType}
           size={[160, 160]}
-          paperRatio={paperRatio}
+          paperSize={paperSize}
           rotate={rotate}
           imageSize={[naturalWidth, naturalHeight]}
           clipPosPercent={[clipLeftPercent || 0, clipTopPercent || 0]}
