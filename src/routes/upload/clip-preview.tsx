@@ -71,10 +71,14 @@ export const ClipPreview = ({
 
   useEffect(() => {
     if (ready && layout) {
+      const isAround = clipType === "around";
+      const maxSideLength = Math.max(...size);
       setClipSize(
         getClipSize({
           layout,
-          containerSize: size,
+          containerSize: isAround
+            ? [size[0] - maxSideLength * 0.08, size[1] - maxSideLength * 0.08]
+            : size,
           imageSize,
           paperRatio,
           clipType,
@@ -95,6 +99,9 @@ export const ClipPreview = ({
       />
     );
   }
+
+  const imageWidth = clipSize.imageWidth;
+  const imageHeight = clipSize.imageHeight;
 
   return (
     <div
@@ -123,7 +130,7 @@ export const ClipPreview = ({
         }
         data-slot="frame"
         className={cn(
-          "relative bg-white flex border border-border-1 overflow-hidden w-(--width) h-(--height)",
+          "relative bg-white flex border border-border-1 w-(--width) h-(--height)",
           {
             "items-center justify-center bg-transparent border-none": [
               "auto",
@@ -138,8 +145,8 @@ export const ClipPreview = ({
         <div
           style={
             {
-              "--width": `${clipSize.imageWidth}px`,
-              "--height": `${clipSize.imageHeight}px`,
+              "--width": `${imageWidth}px`,
+              "--height": `${imageHeight}px`,
               "--rotate-rotate": `${rotate}deg`,
             } as any
           }
@@ -170,8 +177,8 @@ export const ClipPreview = ({
         <div
           style={
             {
-              "--width": `${clipSize.imageWidth}px`,
-              "--height": `${clipSize.imageHeight}px`,
+              "--width": `${imageWidth}px`,
+              "--height": `${imageHeight}px`,
             } as any
           }
           className="absolute w-(--width) h-(--height)"
@@ -179,8 +186,8 @@ export const ClipPreview = ({
           {(typeof children === "function"
             ? children({
                 ...clipSize,
-                frameWidth: clipSize.imageWidth,
-                frameHeight: clipSize.imageHeight,
+                frameWidth: imageWidth,
+                frameHeight: imageHeight,
                 paperRatio,
                 layout,
                 containerSize: size,
@@ -188,7 +195,7 @@ export const ClipPreview = ({
             : children) ??
             (["auto", "around"].includes(clipType) ? (
               <ClipOverlay
-                frameSize={[clipSize.imageWidth, clipSize.imageHeight]}
+                frameSize={[imageWidth, imageHeight]}
                 layout={layout}
                 paperRatio={paperRatio}
                 imageSize={imageSize}

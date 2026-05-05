@@ -19,7 +19,7 @@ export type EditParams = {
   clipHeightPercent?: number;
   clipWidthPercent?: number;
   layout: ClipLayout;
-  autoToning: boolean;
+  autoToning?: boolean;
   naturalWidth?: number;
   naturalHeight?: number;
 };

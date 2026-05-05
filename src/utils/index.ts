@@ -304,6 +304,12 @@ export function getPrintParams({
     const clipTop = clipPosPercent[0] * imageHeight;
     const clipHeight = clipSizePercent[1] * imageHeight;
 
+    // console.log("***** paperRatio: ", paperSize[0] / paperSize[1]);
+    // console.log(
+    //   "***** realRatio: ",
+    //   (imageWidth + blankX * 2) / (clipHeight + blankY * 2),
+    // );
+
     return {
       start_x: 0,
       start_y: clipTop,
@@ -323,6 +329,12 @@ export function getPrintParams({
 
     const clipLeft = clipPosPercent[1] * imageWidth;
     const clipWidth = clipSizePercent[0] * imageWidth;
+
+    // console.log("***** paperRatio: ", paperSize[0] / paperSize[1]);
+    // console.log(
+    //   "***** realRatio: ",
+    //   (clipWidth + blankX * 2)/ (imageHeight + blankY * 2),
+    // );
 
     return {
       start_x: clipLeft,

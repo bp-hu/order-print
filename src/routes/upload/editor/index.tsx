@@ -4,7 +4,6 @@ import { EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
 import { cn } from "@auix/utils";
 import {
-  IconClose,
   IconColorPalette,
   IconEyeOpened,
   IconImage,
@@ -112,61 +111,55 @@ function Editor({
       height="80%"
     >
       <div className="flex flex-col items-center gap-md">
-        <div className="relative">
-          <IconClose
-            className="absolute top-4 right-4 cursor-pointer text-text-1"
-            onClick={() => setVisible(false)}
-          />
-          <ClipPreview
-            paperSize={paperSize}
-            clipType={editParams.clipType}
-            layout={editParams.layout}
-            src={image?.preview_url || src}
-            imageId={image?.id || ""}
-            ready={visible}
-            rotate={editParams.rotate}
-            clipPosPercent={[
-              editParams.clipLeftPercent || 0,
-              editParams.clipTopPercent || 0,
-            ]}
-            clipSizePercent={[
-              editParams.clipWidthPercent || 0,
-              editParams.clipHeightPercent || 0,
-            ]}
-            imageSize={[
-              editParams.naturalWidth || 0,
-              editParams.naturalHeight || 0,
-            ]}
-          >
-            {["auto", "around"].includes(editParams.clipType)
-              ? ({ frameWidth, frameHeight, paperRatio, layout }) => (
-                  <Clip
-                    frameSize={[frameWidth, frameHeight]}
-                    layout={layout}
-                    paperRatio={paperRatio}
-                    clipType={editParams.clipType}
-                    defaultClipPosPercent={[
-                      editParams.clipLeftPercent || 0,
-                      editParams.clipTopPercent || 0,
-                    ]}
-                    imageSize={[
-                      editParams.naturalWidth || 0,
-                      editParams.naturalHeight || 0,
-                    ]}
-                    onMove={(pos) =>
-                      setEditParams({
-                        ...editParams,
-                        ...pos,
-                      })
-                    }
-                  />
-                )
-              : null}
-          </ClipPreview>
-        </div>
+        <ClipPreview
+          paperSize={paperSize}
+          clipType={editParams.clipType}
+          layout={editParams.layout}
+          src={image?.preview_url || src}
+          imageId={image?.id || ""}
+          ready={visible}
+          rotate={editParams.rotate}
+          clipPosPercent={[
+            editParams.clipLeftPercent || 0,
+            editParams.clipTopPercent || 0,
+          ]}
+          clipSizePercent={[
+            editParams.clipWidthPercent || 0,
+            editParams.clipHeightPercent || 0,
+          ]}
+          imageSize={[
+            editParams.naturalWidth || 0,
+            editParams.naturalHeight || 0,
+          ]}
+        >
+          {["auto", "around"].includes(editParams.clipType)
+            ? ({ frameWidth, frameHeight, paperRatio, layout }) => (
+                <Clip
+                  frameSize={[frameWidth, frameHeight]}
+                  layout={layout}
+                  paperRatio={paperRatio}
+                  clipType={editParams.clipType}
+                  defaultClipPosPercent={[
+                    editParams.clipLeftPercent || 0,
+                    editParams.clipTopPercent || 0,
+                  ]}
+                  imageSize={[
+                    editParams.naturalWidth || 0,
+                    editParams.naturalHeight || 0,
+                  ]}
+                  onMove={(pos) =>
+                    setEditParams({
+                      ...editParams,
+                      ...pos,
+                    })
+                  }
+                />
+              )
+            : null}
+        </ClipPreview>
 
         <div className="flex flex-col gap-md">
-          <div className="grid grid-cols-3">
+          <div className="grid grid-cols-3 gap-[4px]">
             {/* <div className="flex items-center gap-xs">
               自动调色
               <Switch
@@ -200,6 +193,17 @@ function Editor({
               }}
             >
               预览
+            </Button>
+            <Button
+              theme="solid"
+              onClick={async () => {
+                setVisible(false);
+                setPreviewVisible(false);
+
+                await updateEditParams();
+              }}
+            >
+              保存
             </Button>
           </div>
           {/* <Rotate

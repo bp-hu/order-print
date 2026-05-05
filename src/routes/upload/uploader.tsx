@@ -101,34 +101,34 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
           onProgress,
           onSuccess,
           onError,
-        }) => {
-          const formData = new FormData();
-          formData.append("file", fileInstance);
-          const { naturalWidth, naturalHeight } =
-            await getImageSize(fileInstance);
-          const imageSize = [naturalWidth, naturalHeight] as [number, number];
-          const photoSize = {
-            w: order?.paper_w || 0,
-            h: order?.paper_h || 0,
-          };
-          const layout =
-            naturalWidth >= naturalHeight ? "horizontal" : "vertical";
-          const frameSize = getFrameSizeFromContainer({
-            layout,
-            containerSize: DEFAULT_CONTAINER_SIZE,
-            paperRatio: photoSize?.w / photoSize?.h,
-            isAuto: true,
-            imageSize,
-          });
-          const { clipHeightPercent, clipWidthPercent } = getClipParams({
-            layout,
-            paperRatio: photoSize?.w / photoSize?.h,
-            frameSize,
-            imageSize,
-          });
+        }) =>
+          uploadQueue.add(async () => {
+            const formData = new FormData();
+            formData.append("file", fileInstance);
+            const { naturalWidth, naturalHeight } =
+              await getImageSize(fileInstance);
+            const imageSize = [naturalWidth, naturalHeight] as [number, number];
+            const photoSize = {
+              w: order?.paper_w || 0,
+              h: order?.paper_h || 0,
+            };
+            const layout =
+              naturalWidth >= naturalHeight ? "horizontal" : "vertical";
+            const frameSize = getFrameSizeFromContainer({
+              layout,
+              containerSize: DEFAULT_CONTAINER_SIZE,
+              paperRatio: photoSize?.w / photoSize?.h,
+              isAuto: true,
+              imageSize,
+            });
+            const { clipHeightPercent, clipWidthPercent } = getClipParams({
+              layout,
+              paperRatio: photoSize?.w / photoSize?.h,
+              frameSize,
+              imageSize,
+            });
 
-          await uploadQueue.add(() =>
-            upload({
+            await upload({
               query: {
                 order_id: orderId,
                 edit_params: JSON.stringify({
@@ -169,6 +169,8 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                 setCurrentIndex(nextIndex);
                 currentIndexRef.current = nextIndex;
 
+                // const { width: naturalWidth1, height: naturalHeight1 } = res.image_metadata || {};
+
                 const imgUrl = await fileToDataURL(fileInstance);
                 setImageCache((prev: any) => [
                   ...prev,
@@ -191,9 +193,9 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                   refreshOrder();
                 }
               },
-            }),
-          );
-        }}
+            });
+          })
+        }
       >
         <Button
           size="small"
