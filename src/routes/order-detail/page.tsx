@@ -16,7 +16,7 @@ import {
 } from "@douyinfe/semi-ui";
 import { useNavigate } from "@edenx/runtime/router";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const { Text } = Typography;
 
@@ -44,13 +44,28 @@ export default () => {
     () => order?.orders.every((item) => item.customer_status === "照片已上传"),
     [order],
   );
-  const isConfirmedRef = useRef<boolean>(false);
+  const isConfirmedRef = useRef<any>(false);
+  const submitRef = useRef<HTMLDivElement>(null);
+  const [tipPos, setTipPos] = useState(250);
+
+  useEffect(() => {
+    if (submitRef.current) {
+      setTipPos(submitRef.current.offsetTop + 100);
+    }
+  }, [isDesigned && !isDone]);
 
   return (
     <>
       {showPrintTip && isDesigned ? (
-        <div className="fixed left-0 top-0 w-full h-full bg-black/50">
-          <div className="absolute top-[250px] text-white p-md">
+        <div
+          style={
+            {
+              "--tip-top": `${tipPos}px`,
+            } as any
+          }
+          className="fixed left-0 top-0 w-full h-full bg-black/50"
+        >
+          <div className="absolute top-(--tip-top) text-white p-md">
             <div
               className="underline"
               onClick={() => {
@@ -147,7 +162,7 @@ export default () => {
         </div>
 
         {isDesigned && !isDone ? (
-          <div>
+          <div ref={submitRef}>
             <Button
               className="w-full"
               theme="solid"

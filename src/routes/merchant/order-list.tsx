@@ -21,7 +21,7 @@ export function OrderList({ filterValue }: { filterValue: FilterValue }) {
   const refresh = useSetAtom(refreshOrderListAtom);
   const [selectedKeys, setSelectedKeys] = useAtom(selectedKeysAtom);
   const [pagination, setPagination] = useState({
-    pageSize: 10,
+    pageSize: 30,
     currentPage: 1,
   });
 
@@ -30,10 +30,13 @@ export function OrderList({ filterValue }: { filterValue: FilterValue }) {
       orderList.filter((v) => {
         let flag = true;
         if (filterValue.searchKey) {
-          flag =
-            flag &&
-            (v.order_number.includes(filterValue.searchKey) ||
-              v.order_name.includes(filterValue.searchKey));
+          const searchKeys = filterValue.searchKey
+            .replace(/\s+/g, "")
+            .split(/,|，/);
+          const matched = searchKeys.some((k) => {
+            return v.order_number.includes(k) || v.order_name.includes(k);
+          });
+          flag = flag && matched;
         }
         if (filterValue.customerStatus) {
           flag = flag && v.customer_status === filterValue.customerStatus;
@@ -152,6 +155,14 @@ export function OrderList({ filterValue }: { filterValue: FilterValue }) {
             width: 120,
             render(remark) {
               return remark?.text || "-";
+            },
+          },
+          {
+            title: "下载次数",
+            dataIndex: "download_count",
+            width: 90,
+            render(count) {
+              return count || 0;
             },
           },
           {
