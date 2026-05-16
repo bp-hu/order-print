@@ -1,9 +1,10 @@
 import { CUSTOMER_STATUS_COLOR, MERCHANT_STATUS_COLOR } from "@/consts";
 import { useUpdateEffect } from "@auix/utils";
-import { IconSearch } from "@douyinfe/semi-icons";
-import { Button, Input, Select } from "@douyinfe/semi-ui";
+import { IconList, IconSearch } from "@douyinfe/semi-icons";
+import { Button, Input, InputGroup, Select } from "@douyinfe/semi-ui";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { BatchSearchModal } from "./batch-search";
 import { customerStatusAtom, merchantStatusAtom } from "./store";
 
 export interface FilterValue {
@@ -30,6 +31,7 @@ export function Filter({
   );
   const customerStatus = useAtomValue(customerStatusAtom);
   const merchantStatus = useAtomValue(merchantStatusAtom);
+  const [visible, setVisible] = useState(false);
 
   useUpdateEffect(() => {
     if (!value) {
@@ -40,13 +42,32 @@ export function Filter({
 
   return (
     <div className="flex flex-wrap items-center gap-md">
-      <Input
-        className="max-w-[200px] min-w-[120px]"
-        showClear
-        placeholder="请输入订单号搜索"
-        value={tempValue.searchKey}
-        onChange={(v) => setTempValue({ ...tempValue, searchKey: v })}
-        prefix={<IconSearch />}
+      <InputGroup>
+        <Input
+          className="max-w-[200px] min-w-[120px]"
+          showClear
+          placeholder="请输入订单号搜索"
+          value={tempValue.searchKey}
+          onChange={(v) => setTempValue({ ...tempValue, searchKey: v })}
+          prefix={<IconSearch />}
+        />
+        <Button
+          icon={<IconList />}
+          onClick={() => {
+            setVisible(true);
+          }}
+        >
+          批量
+        </Button>
+      </InputGroup>
+      <BatchSearchModal
+        visible={visible}
+        setVisible={setVisible}
+        defaultValue={tempValue.searchKey}
+        onOk={(v) => {
+          const nextValue = { ...tempValue, searchKey: v };
+          setValue(nextValue);
+        }}
       />
       <Select
         showClear

@@ -82,7 +82,6 @@ export function OrderCreator() {
                   value: v,
                 }))}
               />
-
               <ArrayField field="orders" initValue={[{}]}>
                 {({ arrayFields, add }) => (
                   <div className="flex flex-col gap-md">

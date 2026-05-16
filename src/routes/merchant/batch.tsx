@@ -3,7 +3,7 @@ import { download } from "@/utils";
 import { http } from "@/utils/http";
 import { Badge, Button, Form, Modal, Toast } from "@douyinfe/semi-ui";
 import { FormApi } from "@douyinfe/semi-ui/lib/es/form";
-import { useRequest } from "@safe-fe/hooks";
+import { useClipboardCopy, useRequest } from "@safe-fe/hooks";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
 import {
@@ -14,6 +14,7 @@ import {
 } from "./store";
 
 export function Batch() {
+  const { copy } = useClipboardCopy();
   const [batchMode, setBatchMode] = useAtom(batchModeAtom);
   const [selectedKeys, setSelectedKeys] = useAtom(selectedKeysAtom);
   const refresh = useSetAtom(refreshOrderListAtom);
@@ -70,8 +71,6 @@ export function Batch() {
                     (res.downloads || []).forEach((item) => {
                       download(item.url);
                     });
-                    setSelectedKeys([]);
-                    setBatchMode(false);
                   },
                 });
               }}
@@ -84,6 +83,15 @@ export function Batch() {
             onClick={() => setVisible(true)}
           >
             编辑
+          </Button>
+          <Button
+            disabled={!selectedKeys.length}
+            onClick={() => {
+              copy(selectedKeys.map((v) => v.split("_@")[0]).join("\n"));
+              Toast.success("复制成功");
+            }}
+          >
+            复制
           </Button>
           <Modal
             title="批量编辑订单"

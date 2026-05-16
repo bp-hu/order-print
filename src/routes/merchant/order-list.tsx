@@ -32,7 +32,8 @@ export function OrderList({ filterValue }: { filterValue: FilterValue }) {
         if (filterValue.searchKey) {
           const searchKeys = filterValue.searchKey
             .replace(/\s+/g, "")
-            .split(/,|，/);
+            .split(/,|，/)
+            .filter(Boolean);
           const matched = searchKeys.some((k) => {
             return v.order_number.includes(k) || v.order_name.includes(k);
           });
