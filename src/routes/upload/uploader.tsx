@@ -1,4 +1,5 @@
 import { DEFAULT_CONTAINER_SIZE } from "@/consts";
+import { updateImageParams } from "@/servers";
 import { imageCacheAtom, refreshOrderAtom } from "@/stores";
 import {
   fileToDataURL,
@@ -7,7 +8,6 @@ import {
   getPrintParams,
   single,
 } from "@/utils";
-import { getImageSize } from "@/utils/get-image-size";
 import { http } from "@/utils/http";
 import { IconUpload } from "@douyinfe/semi-icons";
 import { Button, Modal, Progress, Spin, Upload } from "@douyinfe/semi-ui";
@@ -105,53 +105,10 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
           uploadQueue.add(async () => {
             const formData = new FormData();
             formData.append("file", fileInstance);
-            const { naturalWidth, naturalHeight } =
-              await getImageSize(fileInstance);
-            const imageSize = [naturalWidth, naturalHeight] as [number, number];
-            const photoSize = {
-              w: order?.paper_w || 0,
-              h: order?.paper_h || 0,
-            };
-            const layout =
-              naturalWidth >= naturalHeight ? "horizontal" : "vertical";
-            const frameSize = getFrameSizeFromContainer({
-              layout,
-              containerSize: DEFAULT_CONTAINER_SIZE,
-              paperRatio: photoSize?.w / photoSize?.h,
-              isAuto: true,
-              imageSize,
-            });
-            const { clipHeightPercent, clipWidthPercent } = getClipParams({
-              layout,
-              paperRatio: photoSize?.w / photoSize?.h,
-              frameSize,
-              imageSize,
-            });
-
             await upload({
               query: {
                 order_id: orderId,
-                edit_params: JSON.stringify({
-                  count: 1,
-                  paper_w: photoSize?.w,
-                  paper_h: photoSize?.h,
-                  naturalWidth,
-                  naturalHeight,
-                  clipType: "auto",
-                  layout,
-                  clipHeightPercent,
-                  clipWidthPercent,
-                  clipTopPercent: 0,
-                  clipLeftPercent: 0,
-                  ...getPrintParams({
-                    paperSize: [photoSize?.w || 0, photoSize?.h || 0],
-                    clipType: "auto",
-                    layout,
-                    imageSize,
-                    clipPosPercent: [0, 0],
-                    clipSizePercent: [clipWidthPercent, clipHeightPercent],
-                  }),
-                }),
+                edit_params: JSON.stringify({}),
               },
               body: formData,
               onUploadProgress(e: any) {
@@ -169,9 +126,62 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                 setCurrentIndex(nextIndex);
                 currentIndexRef.current = nextIndex;
 
-                // const { width: naturalWidth1, height: naturalHeight1 } = res.image_metadata || {};
+                // 根据后端返回的真实图片尺寸计算剪裁参数和打印参数
+                const { width: naturalWidth, height: naturalHeight } =
+                  res.image_metadata || {};
+                const imageSize = [naturalWidth, naturalHeight] as [
+                  number,
+                  number,
+                ];
+                const photoSize = {
+                  w: order?.paper_w || 0,
+                  h: order?.paper_h || 0,
+                };
+                const layout =
+                  naturalWidth >= naturalHeight ? "horizontal" : "vertical";
+                const frameSize = getFrameSizeFromContainer({
+                  layout,
+                  containerSize: DEFAULT_CONTAINER_SIZE,
+                  paperRatio: photoSize?.w / photoSize?.h,
+                  isAuto: true,
+                  imageSize,
+                });
+                const { clipHeightPercent, clipWidthPercent } = getClipParams({
+                  layout,
+                  paperRatio: photoSize?.w / photoSize?.h,
+                  frameSize,
+                  imageSize,
+                });
 
-                const imgUrl = await fileToDataURL(fileInstance);
+                const [_, imgUrl] = await Promise.all([
+                  updateImageParams({
+                    orderId,
+                    imageId: res.id,
+                    params: {
+                      count: 1,
+                      paper_w: photoSize?.w,
+                      paper_h: photoSize?.h,
+                      naturalWidth,
+                      naturalHeight,
+                      clipType: "auto",
+                      layout,
+                      clipHeightPercent,
+                      clipWidthPercent,
+                      clipTopPercent: 0,
+                      clipLeftPercent: 0,
+                      ...getPrintParams({
+                        paperSize: [photoSize?.w || 0, photoSize?.h || 0],
+                        clipType: "auto",
+                        layout,
+                        imageSize,
+                        clipPosPercent: [0, 0],
+                        clipSizePercent: [clipWidthPercent, clipHeightPercent],
+                      }),
+                    },
+                  }),
+                  fileToDataURL(fileInstance),
+                ]);
+
                 setImageCache((prev: any) => [
                   ...prev,
                   { url: imgUrl, key: res.id },
