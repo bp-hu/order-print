@@ -38,8 +38,6 @@ function ImageContainer({
     layout,
     clipType,
     rotate,
-    naturalHeight = 0,
-    naturalWidth = 0,
     clipTopPercent,
     clipLeftPercent,
     clipWidthPercent,
@@ -47,6 +45,8 @@ function ImageContainer({
     paper_h = 0,
     paper_w = 0,
   } = image?.edited_params ?? {};
+  const { height: naturalHeight = 0, width: naturalWidth = 0 } =
+    image?.image_metadata ?? {};
   const countRef = useRef(count);
   countRef.current = count;
   const [tempCount, setTempCount] = useState<number | undefined>(() => count);
@@ -216,9 +216,9 @@ export default ({
         disableDownload
       />
       <div className="flex flex-wrap gap-x-4xs gap-y-lg">
-        {order?.images.map((_, index) => (
+        {order?.images.map((v, index) => (
           <ImageContainer
-            key={index}
+            key={v.id + index}
             index={index}
             setCount={(count) => {
               const nextImages = order?.images.map((item, i) =>

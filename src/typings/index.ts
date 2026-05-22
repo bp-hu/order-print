@@ -20,8 +20,6 @@ export type EditParams = {
   clipWidthPercent?: number;
   layout: ClipLayout;
   autoToning?: boolean;
-  naturalWidth?: number;
-  naturalHeight?: number;
 };
 
 export type TImage = {
@@ -33,6 +31,10 @@ export type TImage = {
   size: number;
   created_at: string;
   edited_params: EditParams;
+  image_metadata: {
+    width: number;
+    height: number;
+  };
 };
 
 export interface IOrder {

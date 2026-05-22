@@ -27,6 +27,8 @@ export function Batch() {
   function getNextImages(clipType: ClipType) {
     return (order?.images || []).map((v) => {
       const editParams = v.edited_params as EditParams;
+      const metadata = v.image_metadata || {};
+
       return {
         ...v,
         edited_params: {
@@ -36,10 +38,7 @@ export function Batch() {
             paperSize: [editParams.paper_w || 0, editParams.paper_h || 0],
             layout: editParams.layout,
             clipType,
-            imageSize: [
-              editParams.naturalWidth || 0,
-              editParams.naturalHeight || 0,
-            ],
+            imageSize: [metadata.width || 0, metadata.height || 0],
             clipPosPercent: [
               editParams.clipTopPercent || 0,
               editParams.clipLeftPercent || 0,

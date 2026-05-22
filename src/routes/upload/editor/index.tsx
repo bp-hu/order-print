@@ -2,7 +2,7 @@ import { updateImageParams } from "@/servers";
 import { isEditedAtom } from "@/stores";
 import { EditParams } from "@/typings";
 import { getPrintParams } from "@/utils";
-import { cn } from "@auix/utils";
+import { cn, usePersistCallback } from "@auix/utils";
 import {
   IconColorPalette,
   IconEyeOpened,
@@ -42,19 +42,17 @@ function Editor({
   const [editParams, setEditParams] = useState(
     () => image?.edited_params || ({} as EditParams),
   );
+  const metadata = image?.image_metadata;
   const [previewVisible, setPreviewVisible] = useState(false);
 
-  function computeEditParams(editParams: EditParams) {
+  const computeEditParams = usePersistCallback((editParams: EditParams) => {
     return {
       ...editParams,
       ...getPrintParams({
         paperSize: [editParams.paper_w || 0, editParams.paper_h || 0],
         layout: editParams.layout,
         clipType: editParams.clipType,
-        imageSize: [
-          editParams.naturalWidth || 0,
-          editParams.naturalHeight || 0,
-        ],
+        imageSize: [metadata?.width || 0, metadata?.height || 0],
         clipPosPercent: [
           editParams.clipTopPercent || 0,
           editParams.clipLeftPercent || 0,
@@ -65,7 +63,7 @@ function Editor({
         ],
       }),
     };
-  }
+  });
 
   async function updateEditParams() {
     const orderId = order?.order_number;
@@ -127,10 +125,7 @@ function Editor({
             editParams.clipWidthPercent || 0,
             editParams.clipHeightPercent || 0,
           ]}
-          imageSize={[
-            editParams.naturalWidth || 0,
-            editParams.naturalHeight || 0,
-          ]}
+          imageSize={[metadata?.width || 0, metadata?.height || 0]}
         >
           {["auto", "around"].includes(editParams.clipType)
             ? ({ frameWidth, frameHeight, paperRatio, layout }) => (
@@ -143,10 +138,7 @@ function Editor({
                     editParams.clipLeftPercent || 0,
                     editParams.clipTopPercent || 0,
                   ]}
-                  imageSize={[
-                    editParams.naturalWidth || 0,
-                    editParams.naturalHeight || 0,
-                  ]}
+                  imageSize={[metadata?.width || 0, metadata?.height || 0]}
                   onMove={(pos) =>
                     setEditParams({
                       ...editParams,

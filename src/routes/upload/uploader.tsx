@@ -161,8 +161,6 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
                       count: 1,
                       paper_w: photoSize?.w,
                       paper_h: photoSize?.h,
-                      naturalWidth,
-                      naturalHeight,
                       clipType: "auto",
                       layout,
                       clipHeightPercent,

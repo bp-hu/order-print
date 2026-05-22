@@ -106,7 +106,7 @@ export default () => {
           </Button>
         </div>
         <Divider layout="horizontal" />
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-md max-h-[calc(100vh-200px)] overflow-auto">
           {order?.orders.map((item) => (
             <div className="shadow-md p-md rounded-md flex gap-3xs">
               <div className="flex gap-lg">
