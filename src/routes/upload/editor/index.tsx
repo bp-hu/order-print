@@ -74,7 +74,7 @@ function Editor({
         imageId: image.id,
         params: nextEditParams,
       });
-      setOrder({
+      const nextOrder = {
         ...order,
         images: order.images.map((item) =>
           item.id === image.id
@@ -84,7 +84,8 @@ function Editor({
               }
             : item,
         ),
-      });
+      };
+      setOrder(nextOrder);
     }
   }
 

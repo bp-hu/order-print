@@ -2,11 +2,10 @@ import { orderAtom } from "@/stores";
 import { IOrder } from "@/typings";
 import { atom } from "jotai";
 
-const subOrderId = new URLSearchParams(window.location.href.split("?")[1]).get(
-  "subOrderId",
-);
+export const getSubOrderId = () =>
+  new URLSearchParams(window.location.href.split("?")[1]).get("subOrderId");
 
-export const subOrderIdAtom = atom<string>(subOrderId || "");
+export const subOrderIdAtom = atom<string>(getSubOrderId() || "");
 
 export const subOrderAtom = atom<IOrder | undefined>((get) => {
   const order = get(orderAtom);
@@ -17,6 +16,8 @@ export const subOrderAtom = atom<IOrder | undefined>((get) => {
 
 export const setSubOrderAtom = atom(null, (get, set, v: any) => {
   const order = get(orderAtom);
+  const subOrderId = get(subOrderIdAtom);
+
   if (order) {
     order.orders = order.orders.map((item) =>
       item.order_number === subOrderId ? v : item,

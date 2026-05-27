@@ -73,7 +73,10 @@ function ImageContainer({
   }, [count]);
 
   return (
-    <div className="relative w-fit flex flex-col gap-3xs justify-center items-center p-4xs rounded-md border border-border-0 shadow-md">
+    <div
+      data-slot="image-container"
+      className="relative w-fit flex flex-col gap-3xs justify-center items-center p-4xs rounded-md border border-border-0 shadow-md"
+    >
       <div className="relative">
         <ClipPreview
           src={image?.preview_url || url}
