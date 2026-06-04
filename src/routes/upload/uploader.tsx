@@ -63,6 +63,7 @@ export const Uploader = forwardRef<Upload, any>((props, ref) => {
         ref={ref}
         action="https://api.semi.design/upload"
         showUploadList={false}
+        accept=".jpg,.jpeg,.png,.gif,.webp,.avif,.svg,.bmp,.ico,.tif,.tiff,.raw,.cr2,.cr3,.nef,.arw,.dng,.orf,.rw2,.pef,.psd,.psb,.ai,.eps,.indd,.cdr,.xcf,.heic,.heif,.pcx,.tga,.dds,.exr,.hdr"
         multiple
         disabled={count >= total}
         beforeUpload={({ fileList }) => {
